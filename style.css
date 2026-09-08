@@ -6213,13 +6213,13 @@ html {
   
   #ai-chat-popup {
     position: fixed;
-    width: calc(100vw - 24px);
-    max-width: calc(100vw - 24px);
-    height: 70vh;
-    max-height: 500px;
+    width: min(300px, calc(100vw - 24px));
+    max-width: min(300px, calc(100vw - 24px));
+    height: min(400px, 60vh);
+    max-height: 400px;
     bottom: 70px;
     right: 12px;
-    left: 12px;
+    left: auto;
     border-radius: 14px;
   }
   
