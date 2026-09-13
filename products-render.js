@@ -63,7 +63,7 @@
         '<p class="lang-rw" style="display:none;">' + (desc.rw || '') + '</p>' +
         '<p class="lang-fr" style="display:none;">' + (desc.fr || '') + '</p>' +
         '<p class="product-price">' + formatPrice(product.price) + ' <span class="price-unit">' + escapeHtml(product.unit) + '</span></p>' +
-        '<button class="add-to-list" data-item="' + escapeHtml(name.en || '') + '">' +
+        '<button class="add-to-list" data-item="' + escapeHtml(name.en || '') + '" data-price="' + escapeHtml(product.price) + '" data-unit="' + escapeHtml(product.unit || '') + '">' +
           '<span class="lang-en">＋ Add to list</span>' +
           '<span class="lang-rw" style="display:none;">＋ Ongera ku rutonde</span>' +
           '<span class="lang-fr" style="display:none;">＋ Ajouter à la liste</span>' +
