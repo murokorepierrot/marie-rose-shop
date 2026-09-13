@@ -6,7 +6,7 @@
    automatically deleting the old one — this is what stops visitors from
    getting stuck on an old version of the site.
    ========================================================================= */
-const CACHE_VERSION = 'v2026-09-03-1';
+const CACHE_VERSION = 'v2026-09-13-1';
 const STATIC_CACHE = `mrs-static-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
@@ -19,8 +19,6 @@ const PRECACHE_URLS = [
   './manifest.json'
 ];
 
-/* Install: pre-cache the core files, then activate right away instead of
-   waiting for every open tab to be closed first. */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -30,8 +28,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-/* Activate: delete every cache that isn't this version, then take control
-   of any already-open pages immediately. */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
@@ -42,8 +38,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-/* Let the page force this worker to activate immediately when the visitor
-   clicks "Refresh" on the update banner. */
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
@@ -57,10 +51,6 @@ self.addEventListener('fetch', (event) => {
     (request.headers.get('accept') || '').includes('text/html');
 
   if (isHTML) {
-    // Network-first for pages: always try to get the latest HTML. Only fall
-    // back to the cache if the visitor is offline. This is the key fix —
-    // previously a cache-first strategy here is what forced people to do a
-    // hard refresh to see anything new.
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -73,9 +63,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CSS/JS/images/fonts: stale-while-revalidate — serve instantly from cache
-  // for speed, while quietly fetching the latest copy in the background so
-  // the *next* load is already up to date.
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request)
