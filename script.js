@@ -622,15 +622,32 @@
   var listAdd = document.getElementById('listAdd');
   var listItems = document.getElementById('listItems');
   var listEmpty = document.getElementById('listEmpty');
+  var listTotal = document.getElementById('listTotal');
+  var listTotalAmount = document.getElementById('listTotalAmount');
   var listActions = document.getElementById('listActions');
   var listCopy = document.getElementById('listCopy');
   var listClear = document.getElementById('listClear');
   var listWhatsApp = document.getElementById('listWhatsApp');
 
+  // Each list entry is: { name, price, unit, qty }.
+  // price/unit may be 0/'' for manually-typed items (no product data available).
   function loadList() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      var parsed = raw ? JSON.parse(raw) : [];
+      // Migrate legacy lists that stored plain item-name strings.
+      var migrated = parsed.map(function(item) {
+        if (typeof item === 'string') {
+          return { name: item, price: 0, unit: '', qty: 1 };
+        }
+        return {
+          name: item.name || '',
+          price: Number(item.price) || 0,
+          unit: item.unit || '',
+          qty: Math.max(1, parseInt(item.qty, 10) || 1)
+        };
+      });
+      return migrated;
     } catch (e) {
       return [];
     }
@@ -638,25 +655,86 @@
   function saveList(arr) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch (e) {}
   }
+  function formatMoney(n) {
+    return Math.round(n).toLocaleString('en-US');
+  }
   var headerCartCount = document.getElementById('headerCartCount');
 
   function renderList() {
     var items = loadList();
+    var totalCount = items.reduce(function(sum, i) { return sum + i.qty; }, 0);
+    var totalPrice = items.reduce(function(sum, i) { return sum + i.qty * i.price; }, 0);
+
     if (headerCartCount) {
-      if (items.length) {
-        headerCartCount.textContent = items.length > 99 ? '99+' : String(items.length);
+      if (totalCount) {
+        headerCartCount.textContent = totalCount > 99 ? '99+' : String(totalCount);
         headerCartCount.hidden = false;
       } else {
         headerCartCount.hidden = true;
       }
     }
+
     if (listItems) listItems.innerHTML = '';
     items.forEach(function(item, idx) {
       var li = document.createElement('li');
-      li.textContent = item;
+
+      var info = document.createElement('div');
+      info.className = 'list-item-info';
+
+      var nameEl = document.createElement('span');
+      nameEl.className = 'list-item-name';
+      nameEl.textContent = item.name;
+      info.appendChild(nameEl);
+
+      if (item.price > 0) {
+        var lineEl = document.createElement('span');
+        lineEl.className = 'list-item-line-price';
+        lineEl.innerHTML = formatMoney(item.price * item.qty) + ' RWF ' +
+          '<span class="list-item-unit-price">(' + formatMoney(item.price) + (item.unit ? ' / ' + item.unit : '') + ')</span>';
+        info.appendChild(lineEl);
+      }
+      li.appendChild(info);
+
+      var qtyWrap = document.createElement('div');
+      qtyWrap.className = 'list-item-qty';
+
+      var minusBtn = document.createElement('button');
+      minusBtn.type = 'button';
+      minusBtn.textContent = '\u2212';
+      minusBtn.setAttribute('aria-label', 'Decrease quantity of ' + item.name);
+      minusBtn.addEventListener('click', function() {
+        if (item.qty <= 1) {
+          items.splice(idx, 1);
+        } else {
+          item.qty -= 1;
+        }
+        saveList(items);
+        renderList();
+      });
+      qtyWrap.appendChild(minusBtn);
+
+      var qtyVal = document.createElement('span');
+      qtyVal.className = 'list-item-qty-value';
+      qtyVal.textContent = item.qty;
+      qtyWrap.appendChild(qtyVal);
+
+      var plusBtn = document.createElement('button');
+      plusBtn.type = 'button';
+      plusBtn.textContent = '+';
+      plusBtn.setAttribute('aria-label', 'Increase quantity of ' + item.name);
+      plusBtn.addEventListener('click', function() {
+        item.qty += 1;
+        saveList(items);
+        renderList();
+      });
+      qtyWrap.appendChild(plusBtn);
+
+      li.appendChild(qtyWrap);
+
       var rm = document.createElement('button');
+      rm.className = 'list-item-remove';
       rm.innerHTML = '\u00D7';
-      rm.setAttribute('aria-label', 'Remove ' + item);
+      rm.setAttribute('aria-label', 'Remove ' + item.name);
       rm.title = 'Remove';
       rm.addEventListener('click', function() {
         items.splice(idx, 1);
@@ -664,29 +742,48 @@
         renderList();
       });
       li.appendChild(rm);
+
       if (listItems) listItems.appendChild(li);
     });
+
     if (listEmpty) listEmpty.style.display = items.length ? 'none' : 'block';
     if (listActions) listActions.style.display = items.length ? 'flex' : 'none';
+    if (listTotal) listTotal.style.display = items.length ? 'flex' : 'none';
+    if (listTotalAmount) {
+      listTotalAmount.innerHTML = formatMoney(totalPrice) + ' <span class="list-total-currency">RWF</span>';
+    }
     if (listWhatsApp) {
-      var text = encodeURIComponent('Hello Marie Rose Shop, I would like to buy the following items:\n\n' + items.join('\n'));
-      listWhatsApp.href = 'https://wa.me/250789542601?text=' + text;
+      var lines = items.map(function(i) {
+        var line = i.qty + 'x ' + i.name;
+        if (i.price > 0) line += ' — ' + formatMoney(i.price * i.qty) + ' RWF';
+        return line;
+      });
+      var msg = 'Hello Marie Rose Shop, I would like to buy the following items:\n\n' + lines.join('\n');
+      if (totalPrice > 0) msg += '\n\nEstimated total: ' + formatMoney(totalPrice) + ' RWF';
+      listWhatsApp.href = 'https://wa.me/250789542601?text=' + encodeURIComponent(msg);
     }
   }
-  function addItem(name) {
+
+  function addItem(name, price, unit) {
     var items = loadList();
-    var clean = name.trim();
-    if (!clean || items.includes(clean)) return;
-    items.push(clean);
+    var clean = (name || '').trim();
+    if (!clean) return;
+    var existing = items.find(function(i) { return i.name === clean; });
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      items.push({ name: clean, price: Number(price) || 0, unit: unit || '', qty: 1 });
+    }
     saveList(items);
     renderList();
   }
   if (listAdd && listInput) {
-    listAdd.addEventListener('click', function() { addItem(listInput.value); });
+    listAdd.addEventListener('click', function() { addItem(listInput.value); listInput.value = ''; });
     listInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
         addItem(listInput.value);
+        listInput.value = '';
       }
     });
   }
@@ -694,7 +791,7 @@
     btn.addEventListener('click', function() {
       var item = this.dataset.item;
       if (!item) return;
-      addItem(item);
+      addItem(item, this.dataset.price, this.dataset.unit);
       this.textContent = '\u2713 Added';
       this.classList.add('added');
       flyToCart(this);
@@ -775,7 +872,13 @@
     listCopy.addEventListener('click', function() {
       var items = loadList();
       if (!items.length) return;
-      var text = items.join('\n');
+      var text = items.map(function(i) {
+        var line = i.qty + 'x ' + i.name;
+        if (i.price > 0) line += ' — ' + formatMoney(i.price * i.qty) + ' RWF';
+        return line;
+      }).join('\n');
+      var totalPrice = items.reduce(function(sum, i) { return sum + i.qty * i.price; }, 0);
+      if (totalPrice > 0) text += '\n\nEstimated total: ' + formatMoney(totalPrice) + ' RWF';
       var ok = function() {
         var original = listCopy.textContent;
         listCopy.textContent = 'Copied!';
