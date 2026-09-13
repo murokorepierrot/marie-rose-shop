@@ -1,145 +1,1732 @@
-/* =========================================================================
-   Marie Rose Shop — Product Renderer
-   -------------------------------------------------------------------------
-   Reads products.json and builds the same .product-card / .category-block
-   markup that used to be hand-typed directly in index.html. script.js's
-   search, filter, and "add to list" code looks for .product-card elements
-   as soon as it runs, so this file must finish inserting all product cards
-   into the DOM BEFORE script.js executes.
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#3d7a3d">
 
-   To guarantee that order without restructuring script.js, this file:
-     - is a plain, non-deferred, non-async <script> tag placed in index.html
-       directly BEFORE the <script src="script.js"> tag
-     - uses a synchronous XMLHttpRequest (intentionally, despite normally
-       being discouraged) so the browser cannot move on to the next script
-       tag until products.json has been fetched and all cards rendered
+ <!-- Cache control: always ask the browser to check the network for a fresh copy
+       of THIS document instead of serving a stale one from disk/back-forward cache. -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+ 
+  <!-- Primary Meta Tags -->
+  <title>Marie Rose Shop | Your Trusted Neighborhood Shop in Kigali</title>
+  <meta name="title" content="Marie Rose Shop | Your Trusted Neighborhood Shop in Kigali">
+  <meta name="description" content="Marie Rose Shop — quality groceries and household essentials in Jabana, Gasabo, Kigali. Rice, flour, cooking oil, drinks, spices and more, at fair prices. Official EBM receipts on every sale.">
+  <meta name="keywords" content="Marie Rose Shop, grocery store Kigali, Jabana supermarket, Gasabo shop, household essentials, EBM receipts, quality groceries">
 
-   HOW TO UPDATE PRICES OR PRODUCTS:
-   1. Open products.json
-   2. Find the product by "id" (or copy an existing entry to add a new one)
-   3. Edit "price", "name", "description", "image", etc.
-   4. Save, commit, and push to GitHub — no HTML editing required.
-   ========================================================================= */
-(function () {
-  'use strict';
+  <!-- Canonical -->
+  <link rel="canonical" href="https://murokorepierrot.github.io/marie-rose-shop/">
+  
 
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
 
-  function formatPrice(price) {
-    return Number(price).toLocaleString('en-US');
-  }
+<meta name="msvalidate.01" content="F418770C0C85A74B8C16AB09FC35C4DF" />
 
-  function buildProductCard(product) {
-    var badgeHtml = '';
-    if (product.badge === 'popular') {
-      badgeHtml = '<span class="product-badge popular">Popular</span>';
-    } else if (product.badge === 'new') {
-      badgeHtml = '<span class="product-badge new">New</span>';
+<!-- PWA: installable app manifest + iOS support -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Marie Rose Shop">
+
+
+<!-- Icons for Browser, iOS, and Android -->
+<link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/logo.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo.png">
+<link rel="mask-icon" href="images/logo.png" color="#3d7a3d">
+
+ 
+  <!-- Open Graph / Facebook - using grocery.png -->
+  <meta property="og:type" content="business.business">
+  <meta property="og:title" content="Marie Rose Shop | Your Trusted Neighborhood Shop in Kigali">
+  <meta property="og:description" content="Quality groceries and household essentials in Jabana, Gasabo, Kigali. Fair prices, friendly service, every single day.">
+  <meta property="og:image" content="https://murokorepierrot.github.io/marie-rose-shop/images/grocery.png">
+  <meta property="og:image:secure_url" content="https://murokorepierrot.github.io/marie-rose-shop/images/grocery.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="Marie Rose Shop - Your Trusted Neighborhood Shop in Kigali">
+  <meta property="og:url" content="https://murokorepierrot.github.io/marie-rose-shop/">
+  <meta property="og:locale" content="en_RW">
+  <meta property="og:site_name" content="Marie Rose Shop">
+
+  <!-- Twitter - using grucery.png -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Marie Rose Shop | Your Trusted Neighborhood Shop in Kigali">
+  <meta name="twitter:description" content="Quality groceries and household essentials in Jabana, Gasabo, Kigali. Fair prices, friendly service.">
+  <meta name="twitter:image" content="https://murokorepierrot.github.io/marie-rose-shop/images/grocery.png">
+  <meta name="twitter:image:alt" content="Marie Rose Shop - Your Trusted Neighborhood Shop in Kigali">
+
+  <!-- Google Site Verification -->
+ <meta name="google-site-verification" content="oxLXitYfHECWMDX9sPaAWebMsLMAjlMYqRKoFTRamy4" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+   <!-- Styles -->
+  <!-- SITE_VERSION cache-buster: bump this value (e.g. to today's date) every time you edit
+       style.css or script.js and push to GitHub. Changing the query string forces every
+       browser/device to fetch the new file instead of reusing an old cached copy. -->
+ <link rel="stylesheet" href="style.css?v=20260913-1">
+
+  <!-- Structured Data for Google Search -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GroceryStore",
+       "@id": "https://murokorepierrot.github.io/marie-rose-shop/#shop",
+      "name": "Marie Rose Shop",
+      "logo": "https://murokorepierrot.github.io/marie-rose-shop/images/logo.png",
+      "image": "https://murokorepierrot.github.io/marie-rose-shop/images/grocery.png",
+      "url": "https://murokorepierrot.github.io/marie-rose-shop/",
+      "description": "Quality groceries and household essentials in Jabana, Gasabo, Kigali. Rice, flour, cooking oil, drinks, spices and more, at fair prices. Official EBM receipts on every sale.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jabana, Kabuye Cell",
+        "addressRegion": "Gasabo, Kigali",
+        "addressCountry": "RW"
+      },
+      "openingHoursSpecification": [
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "07:00", "closes": "21:30" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "07:30", "closes": "21:00" }
+      ],
+      "telephone": "+250789542601",
+      "priceRange": "$$",
+      "paymentAccepted": ["Cash", "Mobile Money"],
+      "employee": [
+        { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#marierose" },
+        { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#pierrot" },
+        { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#bienfait" },
+        { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#jeanpierre" }
+      ],
+      "founder": { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#marierose" }
     }
-
-    var name = product.name || {};
-    var desc = product.description || {};
-
-    return (
-      '<div class="product-card reveal" data-name="' + escapeHtml(product.searchName || '') + '">' +
-        badgeHtml +
-        '<div class="product-photo-slot">' +
-          '<a href="#" onclick="openLightbox(this); return false;">' +
-            '<img src="' + escapeHtml(product.image) + '" alt="' + escapeHtml(product.imageAlt || name.en || '') + '" loading="lazy" data-group="' + escapeHtml(product.category) + '">' +
-          '</a>' +
-          '<span class="stock-badge">In Stock</span>' +
-        '</div>' +
-        '<h4 class="lang-en">' + (name.en || '') + '</h4>' +
-        '<h4 class="lang-rw" style="display:none;">' + (name.rw || '') + '</h4>' +
-        '<h4 class="lang-fr" style="display:none;">' + (name.fr || '') + '</h4>' +
-        '<p class="lang-en">' + (desc.en || '') + '</p>' +
-        '<p class="lang-rw" style="display:none;">' + (desc.rw || '') + '</p>' +
-        '<p class="lang-fr" style="display:none;">' + (desc.fr || '') + '</p>' +
-        '<p class="product-price">' + formatPrice(product.price) + ' <span class="price-unit">' + escapeHtml(product.unit) + '</span></p>' +
-        '<button class="add-to-list" data-item="' + escapeHtml(name.en || '') + '" data-price="' + escapeHtml(product.price) + '" data-unit="' + escapeHtml(product.unit || '') + '">' +
-          '<span class="lang-en">＋ Add to list</span>' +
-          '<span class="lang-rw" style="display:none;">＋ Ongera ku rutonde</span>' +
-          '<span class="lang-fr" style="display:none;">＋ Ajouter à la liste</span>' +
-        '</button>' +
-      '</div>'
-    );
-  }
-
-  function buildCategoryBlock(category, products) {
-    var count = products.length;
-    var heading =
-      '<h3 class="category-heading">' + category.icon + ' ' +
-        '<span class="lang-en">' + category.name.en + '</span>' +
-        '<span class="lang-rw" style="display:none;">' + category.name.rw + '</span>' +
-        '<span class="lang-fr" style="display:none;">' + category.name.fr + '</span> ' +
-        '<span class="category-count">' + count + ' items</span>' +
-      '</h3>';
-
-    var cardsHtml = products.map(buildProductCard).join('');
-
-    var viewMoreLabel = 'View more ' + category.name.en.replace(/&amp;/g, '&');
-
-    var footer =
-      '<div class="view-more-wrap">' +
-        '<button class="view-more-btn" data-grid="' + category.id + '" data-more-label="' + escapeHtml(viewMoreLabel) + '">' +
-          '<span class="btn-label lang-en">' + escapeHtml(viewMoreLabel) + '</span>' +
-          '<span class="btn-label lang-rw" style="display:none;">Reba byinshi</span>' +
-          '<span class="btn-label lang-fr" style="display:none;">Voir plus</span>' +
-          '<span class="chev">▾</span>' +
-        '</button>' +
-      '</div>';
-
-    return (
-      '<div class="category-block" data-category="' + category.id + '">' +
-        heading +
-        '<div class="product-grid" data-category="' + category.id + '">' + cardsHtml + '</div>' +
-        footer +
-      '</div>'
-    );
-  }
-
-  function renderAll(data) {
-    var stage = document.querySelector('.categories-stage');
-    if (!stage) return;
-
-    var productsByCategory = {};
-    data.products.forEach(function (p) {
-      if (!productsByCategory[p.category]) productsByCategory[p.category] = [];
-      productsByCategory[p.category].push(p);
-    });
-
-    var html = data.categories.map(function (category) {
-      var products = productsByCategory[category.id] || [];
-      return buildCategoryBlock(category, products);
-    }).join('');
-
-    stage.innerHTML = html;
-  }
-
-  // Synchronous XHR guarantees this completes and the DOM is populated
-  // BEFORE the parser moves on to the next <script> tag (script.js), which
-  // is what search/filter/add-to-list rely on. This only runs once per
-  // page load and the file is small, so the (usually-discouraged) sync XHR
-  // is an acceptable, simple trade-off here rather than restructuring all
-  // of script.js to wait on an async event.
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'products.json', false); // false = synchronous
-    xhr.send(null);
-    if (xhr.status === 200 || xhr.status === 0) {
-      var data = JSON.parse(xhr.responseText);
-      renderAll(data);
-    } else {
-      console.error('products-render.js: failed to load products.json, status ' + xhr.status);
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://murokorepierrot.github.io/marie-rose-shop/#marierose",
+          "name": "Marie Rose",
+          "jobTitle": "Owner & Cashier",
+          "worksFor": { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#shop" },
+          "image": "https://murokorepierrot.github.io/marie-rose-shop/images/jj.jpeg",
+          "description": "Owns the shop and personally receives and manages all money coming in."
+        },
+        {
+          "@type": "Person",
+          "@id": "https://murokorepierrot.github.io/marie-rose-shop/#pierrot",
+          "name": "Gikundiro Pierrot",
+          "jobTitle": "EBM Provider",
+          "worksFor": { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#shop" },
+          "image": "https://murokorepierrot.github.io/marie-rose-shop/images/ff.jpeg",
+          "description": "Responsible for issuing official EBM receipts to every client."
+        },
+        {
+          "@type": "Person",
+          "@id": "https://murokorepierrot.github.io/marie-rose-shop/#bienfait",
+          "name": "Gisubizo Bienfait",
+          "jobTitle": "Import & Sourcing",
+          "worksFor": { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#shop" },
+          "image": "https://murokorepierrot.github.io/marie-rose-shop/images/yy.jpeg",
+          "description": "Travels abroad to source quality products at wholesale prices."
+        },
+        {
+          "@type": "Person",
+          "@id": "https://murokorepierrot.github.io/marie-rose-shop/#jeanpierre",
+          "name": "Jean Pierre",
+          "jobTitle": "Import & Sourcing",
+          "worksFor": { "@id": "https://murokorepierrot.github.io/marie-rose-shop/#shop" },
+          "image": "https://murokorepierrot.github.io/marie-rose-shop/images/dd.jpeg",
+          "description": "Travels abroad to source quality products at wholesale prices."
+        }
+      ]
     }
-  } catch (err) {
-    console.error('products-render.js: error rendering products', err);
-  }
-})();
+  </script>
+
+  <style>
+    /* ===== MODERN PROFESSIONAL LOADER ===== */
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #fdfcfa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #page-loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .loader-ring {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 4px solid #e8e4df;
+      border-top: 4px solid #3d7a3d;
+      border-right: 4px solid #c8a45c;
+      animation: spin 1s cubic-bezier(0.65, 0.0, 0.35, 1.0) infinite;
+      box-shadow: 0 8px 32px rgba(61, 122, 61, 0.08);
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loader-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      color: #1a1a1a;
+    }
+    .loader-brand span:first-child {
+      background: #3d7a3d;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 1.2rem;
+      letter-spacing: 0.5px;
+    }
+    .loader-brand em {
+      color: #c8a45c;
+      font-style: normal;
+      font-weight: 500;
+    }
+    .loader-progress {
+      width: 200px;
+      height: 3px;
+      background: #e8e4df;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .loader-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #3d7a3d, #c8a45c);
+      border-radius: 20px;
+      transition: width 0.2s ease;
+    }
+    .loader-label {
+      font-size: 0.8rem;
+      color: #888;
+      letter-spacing: 0.3px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: -8px;
+    }
+  </style>
+</head>
+<body>
+    
+  <!-- ===== MODERN LOADER ===== -->
+  <div id="page-loader" role="status" aria-live="polite">
+    <div class="loader-ring"></div>
+    <div class="loader-brand">
+      <span>MR</span> Marie Rose <em>Shop</em>
+    </div>
+    <div class="loader-progress">
+      <div class="loader-progress-bar" id="loaderProgressBar"></div>
+    </div>
+    <div class="loader-label" id="loaderLabel">Loading essentials …</div>
+  </div>
+
+  <!-- ===== SCROLL PROGRESS BAR ===== -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+  <!-- ===== HEADER / NAV ===== -->
+  <header class="site-header" id="top">
+    <div class="header-inner">
+      <a href="#top" class="logo">
+        <span class="logo-mark">MR</span>
+        <span class="logo-text">Marie Rose <em>Shop</em></span>
+      </a>
+
+      <!-- Mobile Back Arrow (Hidden by default) -->
+      <button type="button" class="search-back-btn" id="searchBackBtn" aria-label="Go back from search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+
+      <div class="nav-search" id="navSearch">
+        <input type="text" id="productSearch" autocomplete="off"
+               placeholder="Search products… e.g. rice, oil, milk" aria-label="Search products">
+        <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <button type="button" class="search-clear" id="searchClear" aria-label="Clear search">×</button>
+        <ul class="search-dropdown" id="searchDropdown" role="listbox" aria-label="Product suggestions"></ul>
+      </div>
+
+      <!-- Header cart/list badge — mirrors the shopping-list state -->
+      <a href="#shopping-list" class="header-cart-btn" id="headerCartBtn" aria-label="View shopping list">
+        <svg viewBox="0 0 24 24" class="cart-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <span class="header-cart-count" id="headerCartCount" hidden>0</span>
+      </a>
+
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="rw">Kinyarwanda</button>
+        <button class="lang-btn" data-lang="fr">Français</button>
+      </div>
+
+      <!-- Main Navigation -->
+      <nav class="main-nav" id="mainNav">
+        <!-- English Links -->
+        <a href="#about" class="lang-en">About</a>
+        <a href="#products" class="lang-en">Products</a>
+        <a href="#gallery" class="lang-en">Gallery</a>
+        <a href="#team" class="lang-en">Our Team</a>
+        <a href="#faq" class="lang-en">FAQ</a>
+        <a href="#contact" class="lang-en">Visit Us</a>
+
+        <!-- Kinyarwanda Links -->
+        <a href="#about" class="lang-rw" style="display:none;">Ibyerekeye</a>
+        <a href="#products" class="lang-rw" style="display:none;">Ibicuruzwa</a>
+        <a href="#gallery" class="lang-rw" style="display:none;">Amashusho</a>
+        <a href="#team" class="lang-rw" style="display:none;">Itsinda</a>
+        <a href="#faq" class="lang-rw" style="display:none;">Ibibazo</a>
+        <a href="#contact" class="lang-rw" style="display:none;">Tusura</a>
+
+        <!-- French Links -->
+        <a href="#about" class="lang-fr" style="display:none;">À propos</a>
+        <a href="#products" class="lang-fr" style="display:none;">Produits</a>
+        <a href="#gallery" class="lang-fr" style="display:none;">Galerie</a>
+        <a href="#team" class="lang-fr" style="display:none;">Notre équipe</a>
+        <a href="#faq" class="lang-fr" style="display:none;">FAQ</a>
+        <a href="#contact" class="lang-fr" style="display:none;">Visitez-nous</a>
+      </nav>
+
+      <button type="button" class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+<!-- ===== HERO ===== -->
+<section class="hero" style="
+  position: relative;
+  z-index: 0;
+  min-height: 72vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a5a2a 0%, #1a3a1a 40%, #0d260d 100%);
+">
+
+  <!-- Background Slideshow (4 photos, crossfade + Ken Burns zoom) -->
+  <div class="hero-slideshow" id="heroSlideshow" aria-hidden="true">
+    <div class="hero-slide is-active" style="background-image: url('images/lk.png');"></div>
+    <div class="hero-slide" style="background-image: url('images/kc.png');"></div>
+    <div class="hero-slide" style="background-image: url('images/wv.png');"></div>
+    <div class="hero-slide" style="background-image: url('images/vx.png');"></div>
+    
+  </div>
+  
+  <!-- Overlay -->
+  <div class="hero-overlay" style="
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1;
+  "></div>
+
+  <!-- Hero Content -->
+  <div class="hero-content" style="
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 720px;
+    padding: 60px 24px 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  ">
+    <!-- Eyebrow - English -->
+    <p class="eyebrow lang-en" style="
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #c8a45c;
+      margin-bottom: .4rem;
+      text-align: center;
+      width: 100%;
+    ">Gasabo, Kigali · Jabana Sector · Kabuye Cell</p>
+    
+    <!-- Eyebrow - French -->
+    <p class="eyebrow lang-fr" style="display:none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #c8a45c;
+      margin-bottom: .4rem;
+      text-align: center;
+      width: 100%;
+    ">Secteur Jabana · Cellule Kabuye · Gasabo, Kigali</p>
+    
+    <!-- Eyebrow - Kinyarwanda -->
+    <p class="eyebrow lang-rw" style="display:none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #c8a45c;
+      margin-bottom: .4rem;
+      text-align: center;
+      width: 100%;
+    ">Gasabo, Kigali · Umurenge wa Jabana · Akagari ka Kabuye</p>
+    
+    <!-- Title - English -->
+    <h1 class="lang-en" style="
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 .3em;
+      line-height: 1.2;
+      text-align: center;
+      width: 100%;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    ">Your Trusted Neighborhood <br>Shop in Kigali</h1>
+    
+    <!-- Title - French -->
+    <h1 class="lang-fr" style="display:none;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 .3em;
+      line-height: 1.2;
+      text-align: center;
+      width: 100%;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    ">Comptoir <br>de confiance à Kigali</h1>
+    
+    <!-- Title - Kinyarwanda -->
+    <h1 class="lang-rw" style="display:none;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 .3em;
+      line-height: 1.2;
+      text-align: center;
+      width: 100%;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    ">Iduka ryizewe <br>mu mujyi wa Kigali</h1>
+    
+    <!-- Tagline - English -->
+    <p class="tagline lang-en" style="
+      font-size: clamp(0.8rem, 1.5vw, 1.15rem);
+      max-width: 520px;
+      margin: 0 auto 0.6rem;
+      color: rgba(255, 255, 255, 0.90);
+      text-align: center;
+      width: 100%;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.2);
+    ">Quality products, fair prices, friendly service — every single day.</p>
+    
+    <!-- Tagline - French -->
+    <p class="tagline lang-fr" style="display:none;
+      font-size: clamp(0.8rem, 1.5vw, 1.15rem);
+      max-width: 520px;
+      margin: 0 auto 0.6rem;
+      color: rgba(255, 255, 255, 0.90);
+      text-align: center;
+      width: 100%;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.2);
+    ">Produits de qualité, prix justes, service amical — chaque jour.</p>
+    
+    <!-- Tagline - Kinyarwanda -->
+    <p class="tagline lang-rw" style="display:none;
+      font-size: clamp(0.8rem, 1.5vw, 1.15rem);
+      max-width: 520px;
+      margin: 0 auto 0.6rem;
+      color: rgba(255, 255, 255, 0.90);
+      text-align: center;
+      width: 100%;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.2);
+    ">Ibicuruzwa byiza, ibiciro byiza, serivisi nziza — bihoraho.</p>
+
+    <!-- Hero Hours -->
+    <div style="
+      display: flex !important;
+      justify-content: center !important;
+      width: 100% !important;
+      margin: 0.2rem 0 0.8rem 0 !important;
+    ">
+      <div id="hoursContainer" style="
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        padding: 6px 16px !important;
+        border-radius: 50px !important;
+        background: rgba(0, 0, 0, 0.40) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 215, 0, 0.15) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        white-space: nowrap !important;
+        min-height: 32px !important;
+      ">
+        <!-- Clock Icon -->
+        <svg id="clockIcon" style="
+          width: 12px;
+          height: 12px;
+          fill: none;
+          stroke: #c8a45c;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          flex-shrink: 0;
+        " viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        
+        <!-- Status Dot -->
+        <span id="hoursDot" style="
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #4caf50;
+          display: inline-block;
+          flex-shrink: 0;
+          box-shadow: 0 0 16px rgba(76, 175, 80, 0.4);
+          border: 1.5px solid rgba(255, 255, 255, 0.2);
+          animation: dotPulse 2s infinite ease-in-out;
+        "></span>
+        
+        <!-- Hours Text -->
+        <span id="hoursText" style="
+          color: #ffffff !important;
+          font-weight: 500 !important;
+          font-size: clamp(0.55rem, 1.5vw, 0.85rem) !important;
+          letter-spacing: 0.2px !important;
+          white-space: nowrap !important;
+          display: inline-block !important;
+        ">Open now · Mon–Sat 7:00 AM–9:30 PM · Sun 7:00 AM–9:00 PM</span>
+      </div>
+    </div>
+
+    <!-- CTA Buttons -->
+    <div class="cta-row" style="
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      justify-content: center !important;
+      align-items: center !important;
+      margin-top: 0.8rem !important;
+      width: 100% !important;
+    ">
+      <a href="#products" class="btn btn-primary" style="
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: clamp(0.65rem, 1.2vw, 0.9rem) !important;
+        background: #3d7a3d !important;
+        color: white !important;
+        border: none !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease !important;
+        min-height: 34px !important;
+      ">
+        <span class="lang-en">Browse Products</span>
+        <span class="lang-fr" style="display:none;">Parcourir nos produits</span>
+        <span class="lang-rw" style="display:none;">Reba Ibicuruzwa</span>
+      </a>
+      
+      <a href="https://wa.me/250789542601" target="_blank" rel="noopener" class="btn btn-whatsapp" style="
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: clamp(0.65rem, 1.2vw, 0.9rem) !important;
+        background: #25d366 !important;
+        color: white !important;
+        border: none !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease !important;
+        min-height: 34px !important;
+      ">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;flex-shrink:0;"><path d="M20.5 3.5A11 11 0 0 0 3.6 17.3L2 22l4.8-1.6A11 11 0 1 0 20.5 3.5Z"/></svg>
+        <span class="lang-en">WhatsApp</span>
+        <span class="lang-fr" style="display:none;">Discuter sur WhatsApp</span>
+        <span class="lang-rw" style="display:none;">Tuvugishe kuri WhatsApp</span>
+      </a>
+      
+      <a href="#contact" class="btn btn-ghost" style="
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: clamp(0.65rem, 1.2vw, 0.9rem) !important;
+        background: transparent !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+        color: #fff !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease !important;
+        min-height: 34px !important;
+      ">
+        <span class="lang-en">Visit Shop</span>
+        <span class="lang-fr" style="display:none;">Visiter la boutique</span>
+        <span class="lang-rw" style="display:none;">Sura Iduka</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // Add keyframe animations
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      @keyframes dotPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // Update hours function
+    function updateHoursCentered() {
+      var dot = document.getElementById('hoursDot');
+      var text = document.getElementById('hoursText');
+      if (!dot || !text) return;
+      
+      var now = new Date();
+      var day = now.getDay();
+      var hour = now.getHours() + now.getMinutes() / 60;
+      var isOpen = (day >= 1 && day <= 6 && hour >= 7.0 && hour < 21.5) || (day === 0 && hour >= 7.0 && hour < 21.0);
+      
+      if (isOpen) {
+        dot.style.background = '#4caf50';
+        dot.style.boxShadow = '0 0 16px rgba(76, 175, 80, 0.4)';
+        dot.style.animation = 'dotPulse 2s infinite ease-in-out';
+        text.textContent = 'Open now · Mon–Sat 7:00 AM–9:30 PM · Sun 7:00 AM–9:00 PM';
+      } else {
+        dot.style.background = '#f44336';
+        dot.style.boxShadow = '0 0 16px rgba(244, 67, 54, 0.4)';
+        dot.style.animation = 'none';
+        text.textContent = 'Closed now';
+      }
+    }
+    
+    updateHoursCentered();
+    setInterval(updateHoursCentered, 60000);
+  })();
+</script>
+
+<script>
+  (function() {
+    'use strict';
+    
+    // Add keyframe animations
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      @keyframes dotPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    // Update hours function
+    function updateHoursResponsive() {
+      var dot = document.getElementById('hoursDot');
+      var text = document.getElementById('hoursText');
+      if (!dot || !text) return;
+      
+      var now = new Date();
+      var day = now.getDay();
+      var hour = now.getHours() + now.getMinutes() / 60;
+      var isOpen = (day >= 1 && day <= 6 && hour >= 7.0 && hour < 21.5) || (day === 0 && hour >= 7.0 && hour < 21.0);
+      
+      if (isOpen) {
+        dot.style.background = '#4caf50';
+        dot.style.boxShadow = '0 0 16px rgba(76, 175, 80, 0.4)';
+        dot.style.animation = 'dotPulse 2s infinite ease-in-out';
+        text.textContent = 'Open now · Mon–Sat 7:00 AM–9:30 PM · Sun 7:00 AM–9:00 PM';
+      } else {
+        dot.style.background = '#f44336';
+        dot.style.boxShadow = '0 0 16px rgba(244, 67, 54, 0.4)';
+        dot.style.animation = 'none';
+        text.textContent = 'Closed now';
+      }
+    }
+    
+    updateHoursResponsive();
+    setInterval(updateHoursResponsive, 60000);
+  })();
+</script>
+
+  </section>
+
+  <!-- ===== TRUST BAR ===== -->
+  <section class="trust-bar" aria-label="Trust badges">
+    <div class="trust-inner">
+      <div class="trust-item reveal"><span class="trust-icon">✅</span><span class="lang-en">EBM Verified Receipts</span><span class="lang-rw" style="display:none;">Inyemezabwishyu za EBM Zemewe</span><span class="lang-fr" style="display:none;">Reçus EBM vérifiés</span></div>
+      <div class="trust-item reveal"><span class="trust-icon">🌍</span><span class="lang-en">Direct Import Sourcing</span><span class="lang-rw" style="display:none;">Ibikomoka mu mahanga</span><span class="lang-fr" style="display:none;">Approvisionnement direct</span></div>
+      <div class="trust-item reveal"><span class="trust-icon">💰</span><span class="lang-en">Fair Fixed Prices</span><span class="lang-rw" style="display:none;">Ibiciro bihamye kandi byiza</span><span class="lang-fr" style="display:none;">Prix fixes et équitables</span></div>
+      <div class="trust-item reveal"><span class="trust-icon">🔄</span><span class="lang-en">Restocked Weekly</span><span class="lang-rw" style="display:none;">Bivugururwa Buri Cyumweru</span><span class="lang-fr" style="display:none;">Réapprovisionné chaque semaine</span></div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS =====
+       Sample quotes — swap in real customer names/photos/wording once you have them.
+       Keep the same lang-en / lang-rw / lang-fr pattern used everywhere else on the site. -->
+  <section class="testimonials" id="testimonials" aria-label="Customer testimonials">
+    <div class="section-inner">
+      <p class="eyebrow center lang-en">What Customers Say</p>
+      <p class="eyebrow center lang-rw" style="display:none;">Ibyo abakiriya batuvugaho</p>
+      <p class="eyebrow center lang-fr" style="display:none;">Ce que disent nos clients</p>
+
+      <h2 class="center reveal lang-en">Trusted by Our Neighbours</h2>
+      <h2 class="center reveal lang-rw" style="display:none;">Twizerwa n'abatugana umunsi kuwundi</h2>
+      <h2 class="center reveal lang-fr" style="display:none;">La confiance de nos voisins</h2>
+
+   <div class="testimonial-grid">
+  <div class="testimonial-card reveal">
+    <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+    <p class="testimonial-quote lang-en">"Prices are fair and the staff always has time for you. I never leave without a proper EBM receipt."</p>
+    <p class="testimonial-quote lang-rw" style="display:none;">"Ibiciro byabo ni byiza kandi abakozi bafite umwanya wo kukwakira. buri kintu cyose uguze uhabwa inyemezabwishyu ya EBM."</p>
+    <p class="testimonial-quote lang-fr" style="display:none;">"Les prix sont justes et le personnel a toujours du temps pour vous. Je ne repars jamais sans un vrai reçu EBM."</p>
+    <p class="testimonial-author">— Uwimana C., Kabuye</p>
+  </div>
+
+  <div class="testimonial-card reveal">
+    <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+    <p class="testimonial-quote lang-en">"Marie Rose Shop is my first stop for rice and cooking oil — always in stock, always the same fair price."</p>
+    <p class="testimonial-quote lang-rw" style="display:none;">"Ku iduka rya Marie Rose Shop niho mbanza kujya nshaka umuceri n'amavuta yo guteka — bihari buri gihe, ku giciro cyiza."</p>
+    <p class="testimonial-quote lang-fr" style="display:none;">"Marie Rose Shop est mon premier arrêt pour le riz et l'huile de cuisson — toujours en stock, toujours au même prix juste."</p>
+    <p class="testimonial-author">— Mugisha J., Jabana</p>
+  </div>
+
+  <div class="testimonial-card reveal">
+    <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+    <p class="testimonial-quote lang-en">"They know their customers by name. Asked for something they didn't have and they brought it in the next week."</p>
+    <p class="testimonial-quote lang-rw" style="display:none;">"Abakozi babo bakorana umwete. Nasabye igicuruzwa kitari kuri uru rubuga barakizana mu cyumweru cyakurikiye."</p>
+    <p class="testimonial-quote lang-fr" style="display:none;">"Ils connaissent leurs clients par leur nom. J'ai demandé un article qu'ils n'avaient pas et ils l'ont ramené la semaine suivante."</p>
+    <p class="testimonial-author">— Ingabire P., Gasabo</p>
+  </div>
+
+  <div class="testimonial-card reveal">
+    <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+    <p class="testimonial-quote lang-en">"The shop is always clean, well-stocked, and the team greets you with a smile every single time."</p>
+    <p class="testimonial-quote lang-rw" style="display:none;">"Iduka rihora risukuye, rifite ibicuruzwa byinshi, kandi abakozi bakira neza buri gihe."</p>
+    <p class="testimonial-quote lang-fr" style="display:none;">"La boutique est toujours propre, bien approvisionnée, et l'équipe vous accueille avec le sourire à chaque fois."</p>
+    <p class="testimonial-author">— Niyonzima D., Kigali</p>
+  </div>
+</div>
+    </div>
+  </section>
+
+  <div class="weave-divider" aria-hidden="true"></div>
+
+<!-- ===== ABOUT ===== -->
+<section class="about" id="about">
+  <div class="section-inner about-grid">
+    <div class="about-copy">
+      <p class="eyebrow lang-en">Our Story</p>
+      <p class="eyebrow lang-rw" style="display:none;">Inkuru yacu</p>
+      <p class="eyebrow lang-fr" style="display:none;">Notre histoire</p>
+      
+      <h2 class="lang-en">
+        <span class="about-scripture-text">We can do all things through Christ, who strengthens us.</span>
+        <span class="about-scripture-ref">Philippians 4:13</span>
+      </h2>
+      <h2 class="lang-rw" style="display:none;">
+        <span class="about-scripture-text">Dushobozwa byose na Kristo, uduha imbaraga.</span>
+        <span class="about-scripture-ref">Abafilipi 4:13</span>
+      </h2>
+      <h2 class="lang-fr" style="display:none;">
+        <span class="about-scripture-text">Nous pouvons tout faire grâce au Christ, qui nous donne la force.</span>
+        <span class="about-scripture-ref">Philippiens 4:13</span>
+      </h2>
+      
+      <p class="lang-en">Marie Rose Shop opened its doors in Kabuye, right here in Jabana Sector, as a small family stall selling a few sacks of rice and flour to neighbours. Today it has grown into a full household-goods and grocery shop — but the idea hasn't changed: stock what families actually need, price it fairly, and treat every customer like a neighbour, because they are.</p>
+      <p class="lang-rw" style="display:none;">Iduka Marie Rose Shop ryafunguye imiryango i Kabuye, hano mu Murenge wa Jabana, ryatangiye ari butiki k'umuryango igurisha ibicuruzwa bya detaye no kubiro nk'umuceri n'ifu ku baturanyi. Uyu munsi ryaragutse riba iduka ryuzuye ry'ibicuruzwa nk'ibikoresho byo murugo iby'isuku n'ibiribwa — ariko intego yacu ntiyahindutse: kugurisha ibicuruzwa byacu ku giciro cyo hasi dore ko tubyikurira mu mahanga.</p>
+      <p class="lang-fr" style="display:none;">Marie Rose Shop a ouvert ses portes à Kabuye, dans le secteur de Jabana, comme une petite échoppe familiale vendant quelques sacs de riz et de farine aux voisins. Aujourd'hui, elle est devenue une boutique d'épicerie et d'articles ménagers complète — mais l'idée n'a pas changé : stocker ce dont les familles ont besoin, à un prix juste, et traiter chaque client comme un voisin.</p>
+      
+      <p class="lang-en">Behind the counter is a small, dedicated team: <strong>Marie Rose</strong>, the owner, who receives and manages the shop's finances herself; <strong>Gikundiro Pierrot</strong>, who handles every sale through the EBM (Electronic Billing Machine) so every client gets a proper, official receipt; and two team members who travel abroad to source quality stock at wholesale prices.</p>
+      <p class="lang-rw" style="display:none;">Imbere mw'iduka hari itsinda rito ry'abanyamwete: <strong>Marie Rose</strong>, wakira amafaranga akaba ari na we ucunga umutungo w'iduka; <strong>Gikundiro Pierrot</strong>, ukurikirana buri kigurishwa cyose akoresheje imashini ya EBM (Electronic Billing Machine) kugira ngo buri mukiriya ahabwe Inyemezabwishyu ikwiye; ndetse n'abafatanyabikorwa babiri <strong>Peter</strong> na <strong>Bienfait</strong> bajya kurangura ibicuruzwa mu mahanga.</p>
+      <p class="lang-fr" style="display:none;">Derrière le comptoir se trouve une petite équipe dévouée : <strong>Marie Rose</strong>, la propriétaire, qui gère elle-même les finances du magasin ; <strong>Gikundiro Pierrot</strong>, qui gère chaque vente via la machine EBM afin que chaque client reçoive un reçu officiel ; et deux membres de l'équipe qui se rendent à l'étranger pour se procurer des produits de qualité à des prix de gros.</p>
+
+      <!-- Values Section -->
+      <div class="values-section">
+        <h3 class="lang-en">Our Values</h3>
+        <h3 class="lang-rw" style="display:none;">Indangagaciro zacu</h3>
+        <h3 class="lang-fr" style="display:none;">Nos valeurs</h3>
+        <div class="values-pills">
+          <span class="values-pill lang-en">🏛️ Integrity</span>
+          <span class="values-pill lang-rw" style="display:none;">🏛️ Umuco</span>
+          <span class="values-pill lang-fr" style="display:none;">🏛️ Intégrité</span>
+          
+          <span class="values-pill lang-en">🤝 Respect</span>
+          <span class="values-pill lang-rw" style="display:none;">🤝 Ikinyabupfura</span>
+          <span class="values-pill lang-fr" style="display:none;">🤝 Respect</span>
+          
+          <span class="values-pill lang-en">🧹 Cleanliness</span>
+          <span class="values-pill lang-rw" style="display:none;">🧹 Isuku</span>
+          <span class="values-pill lang-fr" style="display:none;">🧹 Propreté</span>
+          
+          <span class="values-pill lang-en">🛡️ Safety</span>
+          <span class="values-pill lang-rw" style="display:none;">🛡️ Umutekano</span>
+          <span class="values-pill lang-fr" style="display:none;">🛡️ Sécurité</span>
+        </div>
+      </div>
+
+      <!-- Payment Note -->
+      <div class="payment-note">
+        <p class="eyebrow lang-en">We Accept</p>
+        <p class="eyebrow lang-rw" style="display:none;">Twakira</p>
+        <p class="eyebrow lang-fr" style="display:none;">Nous acceptons</p>
+        <div class="payment-pills">
+          <span class="payment-pill">💵 Cash</span>
+          <span class="payment-pill">📱 MTN MoMo 0789542601</span>
+          <span class="payment-pill">📱 MoMo Pay 2003223</span>
+          <span class="payment-pill">🧾 EBM Receipt Always Included</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT CAROUSEL - Clean Images Only ===== -->
+    <div class="about-media">
+      <div class="about-carousel-wrapper" id="aboutCarousel">
+        <div class="about-carousel-track" id="aboutCarouselTrack">
+          
+          <!-- Slide 1 -->
+          <div class="about-slide active" data-slide="0">
+            <img src="images/lk.png" alt="Marie Rose Shop Interior" loading="lazy" data-group="about">
+          </div>
+          
+          <!-- Slide 3 -->
+          <div class="about-slide" data-slide="2">
+            <img src="images/fv.png" alt="Shop Interior Displays" loading="lazy" data-group="about">
+          </div>
+          
+          <!-- Slide 4 -->
+          <div class="about-slide" data-slide="3">
+            <img src="images/kc.png" alt="Marie Rose Shop Team" loading="lazy" data-group="about">
+          </div>
+          
+          <!-- Slide 5 -->
+          <div class="about-slide" data-slide="4">
+            <img src="images/wv.png" alt="Product Shelves" loading="lazy" data-group="about">
+          </div>
+          
+          <!-- Slide 6 -->
+          <div class="about-slide" data-slide="5">
+            <img src="images/vx.png" alt="Fresh Stock Arrivals" loading="lazy" data-group="about">
+          </div>
+
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="about-carousel-progress" id="aboutCarouselProgress"></div>
+        
+        <!-- Slide Counter -->
+        <span class="about-slide-counter" id="aboutSlideCounter">1 / 6</span>
+
+        <!-- Navigation Arrows -->
+        <button class="about-carousel-arrow prev" id="aboutCarouselPrev" aria-label="Previous slide">&#10094;</button>
+        <button class="about-carousel-arrow next" id="aboutCarouselNext" aria-label="Next slide">&#10095;</button>
+      </div>
+
+      <!-- Dots -->
+      <div class="about-carousel-dots" id="aboutCarouselDots"></div>
+
+      <!-- Map Card -->
+      <div class="about-map-card">
+        <p class="eyebrow lang-en">Find Us</p>
+        <p class="eyebrow lang-rw" style="display:none;">Dushakire</p>
+        <p class="eyebrow lang-fr" style="display:none;">Où nous trouver</p>
+        <p class="map-address">Kabuye Cell, Jabana Sector<br>Gasabo District, Kigali City, Rwanda</p>
+        <div class="map-embed">
+          <iframe title="Map showing Jabana Sector, Gasabo, Kigali"
+            src="https://maps.google.com/maps?q=Jabana%2C%20Gasabo%2C%20Kigali%2C%20Rwanda&output=embed"
+            loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Jabana%2C%20Gasabo%2C%20Kigali%2C%20Rwanda" target="_blank" rel="noopener" class="map-link lang-en">Get directions →</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Jabana%2C%20Gasabo%2C%20Kigali%2C%20Rwanda" target="_blank" rel="noopener" class="map-link lang-rw" style="display:none;">Reba inzira →</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Jabana%2C%20Gasabo%2C%20Kigali%2C%20Rwanda" target="_blank" rel="noopener" class="map-link lang-fr" style="display:none;">Obtenir l'itinéraire →</a>
+      </div>
+    </div>
+  </div>
+</section>
+  <!-- ===== WHY CHOOSE US ===== -->
+  <section class="why-us">
+    <div class="section-inner">
+      <p class="eyebrow center lang-en">What Sets Us Apart</p>
+      <p class="eyebrow center lang-rw" style="display:none;">Ikidutandukanya</p>
+      <p class="eyebrow center lang-fr" style="display:none;">Ce qui nous distingue</p>
+      
+      <h2 class="center reveal lang-en">Why Kabuye Shops With Us</h2>
+      <h2 class="center reveal lang-rw" style="display:none;">Umwihariko wacu</h2>
+      <h2 class="center reveal lang-fr" style="display:none;">Pourquoi Kabuye achète chez nous</h2>
+      
+            <div class="why-grid card-focus-trigger">
+        <div class="why-card reveal"><span class="why-icon">✅</span><h3 class="lang-en">Quality Guaranteed</h3><h3 class="lang-rw" style="display:none;">Ubuzirantenge bwemejwe</h3><h3 class="lang-fr" style="display:none;">Qualité garantie</h3><p class="lang-en">Our team sources stock directly from trusted wholesale suppliers abroad.</p><p class="lang-rw" style="display:none;">Itsinda ryacu rikura ibicuruzwa mu mahanga.</p><p class="lang-fr" style="display:none;">Notre équipe s'approvisionne directement auprès de fournisseurs de gros de confiance à l'étranger.</p></div>
+        <div class="why-card reveal"><span class="why-icon">💰</span><h3 class="lang-en">Affordable Prices</h3><h3 class="lang-rw" style="display:none;">Ibiciro byiza</h3><h3 class="lang-fr" style="display:none;">Prix abordables</h3><p class="lang-en">Fair, transparent prices with an official EBM receipt.</p><p class="lang-rw" style="display:none;">Ibiciro byiza binyura abatugana.</p><p class="lang-fr" style="display:none;">Des prix justes et transparents avec un reçu EBM officiel.</p></div>
+        <div class="why-card reveal"><span class="why-icon">⚡</span><h3 class="lang-en">Fast Service</h3><h3 class="lang-rw" style="display:none;">Serivisi yihuta</h3><h3 class="lang-fr" style="display:none;">Service rapide</h3><p class="lang-en">Well-organised shelves and a quick till mean you're in and out quickly.</p><p class="lang-rw" style="display:none;">Service zihuta.</p><p class="lang-fr" style="display:none;">Des étagères bien organisées et une caisse rapide pour un passage efficace.</p></div>
+        <div class="why-card reveal"><span class="why-icon">🤝</span><h3 class="lang-en">Friendly Staff</h3><h3 class="lang-rw" style="display:none;">Abakozi basobanutse</h3><h3 class="lang-fr" style="display:none;">Personnel amical</h3><p class="lang-en">Marie Rose and the team know their customers by name.</p><p class="lang-rw" style="display:none;">Abakozi bisanisha na bakiriya.</p><p class="lang-fr" style="display:none;">Marie Rose et l'équipe connaissent leurs clients par leur nom.</p></div>
+      </div>
+    </div>
+  </section>
+<!-- ===== GALLERY ===== -->
+<section class="gallery" id="gallery">
+  <div class="section-inner">
+    <p class="eyebrow center lang-en">A Look Inside</p>
+    <p class="eyebrow center lang-rw" style="display:none;">Reba amafoto y'iduka</p>
+    <p class="eyebrow center lang-fr" style="display:none;">Un regard à l'intérieur</p>
+    
+    <h2 class="center reveal lang-en">Our Shop, In Pictures</h2>
+    <h2 class="center reveal lang-rw" style="display:none;">Iduka ryacu mu mafoto</h2>
+    <h2 class="center reveal lang-fr" style="display:none;">Notre boutique en images</h2>
+    
+    <p class="section-lede center lang-en">A glimpse of our shelves, our storefront, and the people who keep it running every day.</p>
+    <p class="section-lede center lang-rw" style="display:none;">Reba imbere mw'iduka, n'abafatanyabikorwa baryo.</p>
+    <p class="section-lede center lang-fr" style="display:none;">Un aperçu de nos étagères, de notre devanture et des personnes qui la font fonctionner chaque jour.</p>
+
+    <!-- GALLERY FILMSTRIP - 6 images, auto-sliding, seamless loop.
+         The 6 tiles below are the real, clickable photos. They are followed
+         by an identical (but non-interactive, aria-hidden) copy of the same
+         6 tiles used purely so the CSS scroll animation can loop seamlessly
+         -- no new photos are added, it's still exactly 6 unique images. -->
+    <div class="gallery-viewport">
+      <div class="gallery-track" id="galleryTrack">
+        <div class="gallery-item active" onclick="openLightbox(this)">
+          <img src="images/lk.png" alt="Inside Marie Rose Shop" loading="lazy" data-group="gallery">
+          <span class="image-count">1 / 6</span>
+          <span class="gloss"></span>
+          <span class="zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="images/fv.png" alt="Marie Rose Shop Storefront" loading="lazy" data-group="gallery">
+          <span class="image-count">2 / 6</span>
+          <span class="gloss"></span>
+          <span class="zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="images/kc.png" alt="Shop Interior Displays" loading="lazy" data-group="gallery">
+          <span class="image-count">3 / 6</span>
+          <span class="gloss"></span>
+          <span class="zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="images/wv.png" alt="Marie Rose Shop Team" loading="lazy" data-group="gallery">
+          <span class="image-count">4 / 6</span>
+          <span class="gloss"></span>
+          <span class="zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="images/vx.png" alt="Product Shelves" loading="lazy" data-group="gallery">
+          <span class="image-count">5 / 6</span>
+          <span class="gloss"></span>
+          <span class="zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="images/lk.png" alt="Fresh Stock Arrivals" loading="lazy" data-group="gallery">
+          <span class="image-count">6 / 6</span>
+          <span class="gloss"></span>
+          <span class="zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        <!-- Decorative duplicate copy (same 6 photos) for a seamless loop -->
+        <div class="gallery-item gallery-item--clone" aria-hidden="true" tabindex="-1">
+          <img src="images/fv.png" alt="" loading="lazy">
+          <span class="image-count">1 / 6</span>
+          <span class="gloss"></span>
+        </div>
+        <div class="gallery-item gallery-item--clone" aria-hidden="true" tabindex="-1">
+          <img src="images/kc.png" alt="" loading="lazy">
+          <span class="image-count">2 / 6</span>
+          <span class="gloss"></span>
+        </div>
+        <div class="gallery-item gallery-item--clone" aria-hidden="true" tabindex="-1">
+          <img src="images/wv.png" alt="" loading="lazy">
+          <span class="image-count">3 / 6</span>
+          <span class="gloss"></span>
+        </div>
+        <div class="gallery-item gallery-item--clone" aria-hidden="true" tabindex="-1">
+          <img src="images/vx.png" alt="" loading="lazy">
+          <span class="image-count">4 / 6</span>
+          <span class="gloss"></span>
+        </div>
+        <div class="gallery-item gallery-item--clone" aria-hidden="true" tabindex="-1">
+          <img src="images/dg.jpg" alt="" loading="lazy">
+          <span class="image-count">5 / 6</span>
+          <span class="gloss"></span>
+        </div>
+        <div class="gallery-item gallery-item--clone" aria-hidden="true" tabindex="-1">
+          <img src="images/web.png" alt="" loading="lazy">
+          <span class="image-count">6 / 6</span>
+          <span class="gloss"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRIPTURE BANNER - Below the gallery -->
+    <div class="gallery-scripture-banner reveal">
+      <span class="ornament-cross" aria-hidden="true">✝</span>
+
+      <!-- English -->
+      <div class="lang-en">
+        <p class="scripture-text"><span class="quote-mark">&ldquo;</span>We can do all things through Christ,<br>who strengthens us.<span class="quote-mark">&rdquo;</span></p>
+        <span class="divider-line"></span>
+        <p class="scripture-ref">Philippians 4:13</p>
+      </div>
+      <!-- Kinyarwanda -->
+      <div class="lang-rw" style="display:none;">
+        <p class="scripture-text"><span class="quote-mark">&ldquo;</span>Dushobozwa byose na Kristo,<br>uduha imbaraga.<span class="quote-mark">&rdquo;</span></p>
+        <span class="divider-line"></span>
+        <p class="scripture-ref">Abafilipi 4:13</p>
+      </div>
+      <!-- French -->
+      <div class="lang-fr" style="display:none;">
+        <p class="scripture-text"><span class="quote-mark">&ldquo;</span>Nous pouvons tout faire grâce au Christ,<br>qui nous donne la force.<span class="quote-mark">&rdquo;</span></p>
+        <span class="divider-line"></span>
+        <p class="scripture-ref">Philippiens 4:13</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- ===== LIGHTBOX OVERLAY ===== -->
+  <div id="lightboxOverlay" class="lightbox-overlay">
+    <button class="lightbox-close" aria-label="Close">&times;</button>
+    <button class="lightbox-prev" aria-label="Previous image">&#10094;</button>
+    <button class="lightbox-next" aria-label="Next image">&#10095;</button>
+    <div class="lightbox-content">
+      <img id="lightboxImage" src="" alt="Gallery Image">
+    </div>
+  </div>
+
+  <!-- ===== CARD FOCUS OVERLAY (testimonials / why-us cards "come to front") ===== -->
+  <div id="cardFocusOverlay" class="card-focus-overlay" aria-hidden="true">
+    <div class="card-focus-content" id="cardFocusContent">
+      <button class="card-focus-close" id="cardFocusClose" aria-label="Close">&times;</button>
+    </div>
+  </div>
+
+  <!-- ===== PRODUCTS ===== -->
+  <section class="products" id="products">
+    <div class="section-inner">
+      <p class="eyebrow center lang-en">On Our Shelves</p>
+      <p class="eyebrow center lang-rw" style="display:none;">Mu iduka ryacu ndetse n'ubuko</p>
+      <p class="eyebrow center lang-fr" style="display:none;">Sur nos étagères</p>
+      
+      <h2 class="center reveal lang-en">Everything Your Kitchen Needs</h2>
+      <h2 class="center reveal lang-rw" style="display:none;">Ibyinshi bikenerwa mubuzima bwa buri munsi</h2>
+      <h2 class="center reveal lang-fr" style="display:none;">Tout ce dont votre cuisine a besoin</h2>
+      
+      <p class="section-lede center lang-en">Real stock, restocked often. Each category shows items first — tap "View more" to see the full shelf, or search above.</p>
+      <p class="section-lede center lang-rw" style="display:none;">Ibicuruzwa byujuje Ubuzirantenge,  Buri cyiciro cyerekana ibintu mbere — kanda "Reba byinshi" kugira ngo ubone ibicuruzwa byose.</p>
+      <p class="section-lede center lang-fr" style="display:none;">Véritable stock, réapprovisionné souvent. Chaque catégorie affiche d'abord les articles — appuyez sur "Voir plus" pour voir toute l'étagère, ou cherchez ci-dessus.</p>
+
+      <p class="no-results" id="noResults" hidden>No products match "<span id="noResultsTerm"></span>". Try another word.</p>
+
+      <div class="categories-stage">
+        <!-- Product categories are injected here by products-render.js from products.json.
+             Do not hand-edit product HTML here anymore - edit products.json instead. -->
+      </div>
+
+      <div class="products-cta">
+        <p class="lang-en">Don't see what you're looking for? We restock often and carry more than what's listed here.</p>
+        <p class="lang-rw" style="display:none;">Mugihe utabona igicuruzwa ushaka twandikire kuri WhatsApp kuko dufite byinshi bitanditse hano</p>
+        <p class="lang-fr" style="display:none;">Vous ne trouvez pas ce que vous cherchez ? Nous réapprovisionnons souvent et avons plus que ce qui est listé ici.</p>
+        <a href="https://wa.me/250789542601" target="_blank" rel="noopener" class="btn btn-whatsapp">
+          <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true"><path d="M20.5 3.5A11 11 0 0 0 3.6 17.3L2 22l4.8-1.6A11 11 0 1 0 20.5 3.5Z"/></svg>
+          <span class="lang-en">Ask us on WhatsApp</span>
+          <span class="lang-rw" style="display:none;">Tumenyeshe kuri WhatsApp</span>
+          <span class="lang-fr" style="display:none;">Demandez-nous sur WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="weave-divider" aria-hidden="true"></div>
+
+  <!-- ===== HOW TO SHOP ===== -->
+  <section class="how-to-shop" id="how-to-shop">
+    <div class="section-inner">
+      <p class="eyebrow center lang-en">Simple & Easy</p>
+      <p class="eyebrow center lang-rw" style="display:none;">Byoroshye</p>
+      <p class="eyebrow center lang-fr" style="display:none;">Simple et facile</p>
+      
+      <h2 class="center reveal lang-en">How to Shop With Us</h2>
+      <h2 class="center reveal lang-rw" style="display:none;">Uburyo bwo guhaha ku batugana</h2>
+      <h2 class="center reveal lang-fr" style="display:none;">Comment acheter chez nous</h2>
+      
+        <div class="steps-grid card-focus-trigger">
+  <div class="step-card reveal">
+    <span class="step-num">1</span>
+    <h3 class="lang-en">Visit the Shop</h3>
+    <h3 class="lang-rw" style="display:none;">Sura iduka</h3>
+    <h3 class="lang-fr" style="display:none;">Visiter la boutique</h3>
+    <p class="lang-en">Walk in anytime during opening hours. We're easy to find in Kabuye, just below the parish church.</p>
+    <p class="lang-rw" style="display:none;">Injira mu iduka igihe dufunguye. Turi muri Jabana, munsi ya kiriziya ya Kabuye.</p>
+    <p class="lang-fr" style="display:none;">Entrez à tout moment pendant les heures d'ouverture. Nous sommes faciles à trouver à Kabuye, juste en dessous de l'église paroissiale.</p>
+  </div>
+
+  <div class="step-card reveal">
+    <span class="step-num">2</span>
+    <h3 class="lang-en">Browse & Pick</h3>
+    <h3 class="lang-rw" style="display:none;">Reba & Uhitemo</h3>
+    <h3 class="lang-fr" style="display:none;">Parcourir et choisir</h3>
+    <p class="lang-en">All products are neatly organised by category. Take your time or ask our friendly team for help.</p>
+    <p class="lang-rw" style="display:none;">Ibicuruzwa byose biteguye neza. Fata igihe cyawe uhitemo cyangwa ubaze abakozi bacu.</p>
+    <p class="lang-fr" style="display:none;">Tous les produits sont bien organisés par catégorie. Prenez votre temps ou demandez de l'aide à notre équipe.</p>
+  </div>
+
+  <div class="step-card reveal">
+    <span class="step-num">3</span>
+    <h3 class="lang-en">Pay Securely</h3>
+    <h3 class="lang-rw" style="display:none;">Ishyura mu buryo bwizewe</h3>
+    <h3 class="lang-fr" style="display:none;">Payer en toute sécurité</h3>
+    <p class="lang-en">Pay with cash, MTN MoMo, or MoMo Pay on 2003223. We accept all major mobile money options.</p>
+    <p class="lang-rw" style="display:none;">Ishyura ukoresheje amafaranga, MTN MoMo, cyangwa MoMo Pay kuri 2003223. Twakira uburyo bwose bwo kwishyura.</p>
+    <p class="lang-fr" style="display:none;">Payez en espèces, MTN MoMo ou MoMo Pay. Nous acceptons toutes les principales options de mobile money.</p>
+  </div>
+
+  <div class="step-card reveal">
+    <span class="step-num">4</span>
+    <h3 class="lang-en">Get Your Receipt</h3>
+    <h3 class="lang-rw" style="display:none;">Ubone Inyemezabwishyu</h3>
+    <h3 class="lang-fr" style="display:none;">Obtenez votre reçu</h3>
+    <p class="lang-en">Every single sale comes with an official EBM receipt. Always ask for it — it's your right!</p>
+    <p class="lang-rw" style="display:none;">Buri gicuruzwa cyose kiguzwe uhabwa inyemezabwishyu ya EBM. Kubaza — ni uburenganzira bwawe!</p>
+    <p class="lang-fr" style="display:none;">Chaque vente est accompagnée d'un reçu EBM officiel. Demandez-le toujours — c'est votre droit!</p>
+  </div>
+</div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="faq" id="faq">
+    <div class="section-inner faq-inner">
+      <p class="eyebrow center lang-en">Common Questions</p>
+      <p class="eyebrow center lang-rw" style="display:none;">IBIBAZO BISANZWE</p>
+      <p class="eyebrow center lang-fr" style="display:none;">QUESTIONS FRÉQUENTES</p>
+      
+      <h2 class="center reveal lang-en">Frequently Asked Questions</h2>
+      <h2 class="center reveal lang-rw" style="display:none;">Ibibazo bikunze kubazwa</h2>
+      <h2 class="center reveal lang-fr" style="display:none;">Questions fréquemment posées</h2>
+      
+      <div class="faq-list">
+        
+        <!-- Question 1: Delivery -->
+        <details class="lang-en faq-item reveal">
+          <summary>Do you offer home delivery?</summary>
+          <p>Currently we operate as a walk-in neighbourhood shop. We do not offer home delivery, but you can call or WhatsApp us to check stock availability before visiting.</p>
+        </details>
+        <details class="lang-rw faq-item reveal" style="display:none;">
+          <summary>Ese mugira serivisi yo kugeza ibicuruzwa aho abakiriya bari?</summary>
+          <p>Kuri ubu, dukora nk'iduka ryo mu gace ryakira abakiriya batugana. Ntabwo dutanga serivisi yo kugeza ibicuruzwa mu rugo, ariko ushaka ibicuruzwa mwaduhamagara cyangwa mukatwandikira kuri WhatsApp mukabanza kumenya ko ibyo mukeneye bihari mbere yo kudusura..</p>
+        </details>
+        <details class="lang-fr faq-item reveal" style="display:none;">
+          <summary>Proposez-vous la livraison à domicile ?</summary>
+          <p>Actuellement, nous fonctionnons comme une boutique de quartier. Nous ne proposons pas de livraison à domicile, mais vous pouvez nous appeler ou nous contacter sur WhatsApp pour vérifier la disponibilité des stocks avant votre visite.</p>
+        </details>
+
+        <!-- Question 2: Payment -->
+        <details class="lang-en faq-item reveal">
+          <summary>What payment methods do you accept?</summary>
+          <p>We accept cash, MTN Mobile Money (MoMo Pay), and Airtel Money. Every payment comes with an official EBM receipt.</p>
+        </details>
+        <details class="lang-rw faq-item reveal" style="display:none;">
+          <summary>Ni ubuhe buryo bwo kwishyura mukoresha?</summary>
+          <p>Twakira amafaranga y'ibicuruzwa na MTN Mobile Money kuri +250789542601 na MoMo Pay kuri iyi code 2003223. Buri gicuruzwa cyose uguze uhabwa inyemezabwishyu ya EBM.</p>
+        </details>
+        <details class="lang-fr faq-item reveal" style="display:none;">
+          <summary>Quels moyens de paiement acceptez-vous ?</summary>
+          <p>Nous acceptons les espèces, MTN Mobile Money (MoMo Pay) et Airtel Money. Chaque paiement est accompagné d'un reçu EBM officiel.</p>
+        </details>
+
+        <!-- Question 3: Request Product -->
+        <details class="lang-en faq-item reveal">
+          <summary>Can I request a product that is not on your shelves?</summary>
+          <p>Yes! If you need something specific, let us know via WhatsApp or at the counter. Our sourcing team travels regularly and can often bring it in.</p>
+        </details>
+        <details class="lang-rw faq-item reveal" style="display:none;">
+          <summary>Nshobora gusaba ikintu kitari mu iduka ryanyu?</summary>
+          <p>Yego! Niba ukeneye ikintu runaka, tubwire kuri WhatsApp cyangwa ku umurongo wa telephone. Itsinda ryacu rijya kurangura hanze kenshi, rikaba rishobora kukibazanira.</p>
+        </details>
+        <details class="lang-fr faq-item reveal" style="display:none;">
+          <summary>Puis-je demander un produit qui n'est pas sur vos étagères ?</summary>
+          <p>Oui ! Si vous avez besoin d'un produit spécifique, faites-le nous savoir via WhatsApp ou au comptoir. Notre équipe d'approvisionnement voyage régulièrement et peut souvent le ramener.</p>
+        </details>
+
+        <!-- Question 4: Negotiable Prices -->
+        <details class="lang-en faq-item reveal">
+          <summary>Are your prices negotiable?</summary>
+          <p>We keep our prices fair and transparent for everyone. The price on the shelf is the final price — no haggling needed.</p>
+        </details>
+        <details class="lang-rw faq-item reveal" style="display:none;">
+          <summary>Ibiciro byanyu birahuzagurika?</summary>
+          <p>Dushyiraho ibiciro byiza kandi byo hasi kuri buri wese. Igiciro kiri ku bicuruzwa ni cyo giciro cyanyuma — nta guciririkanya kundi.</p>
+        </details>
+        <details class="lang-fr faq-item reveal" style="display:none;">
+          <summary>Vos prix sont-ils négociables ?</summary>
+          <p>Nous maintenons des prix équitables et transparents pour tout le monde. Le prix indiqué sur l'étagère est le prix final — pas besoin de marchander.</p>
+        </details>
+
+        <!-- Question 5: Bulk / Wholesale -->
+        <details class="lang-en faq-item reveal">
+          <summary>Do you sell in bulk or wholesale?</summary>
+          <p>Yes — many items like rice, flour, and oil are available in sacks and larger containers at wholesale-friendly prices. Ask at the counter for bulk pricing.</p>
+        </details>
+        <details class="lang-rw faq-item reveal" style="display:none;">
+          <summary>Muraranguza cyangwa mucuruze detail?</summary>
+          <p>Yego — ibintu byinshi nk'umuceri, ifu, n'amavuta biboneka mu mifuka minini ku giciro cyiza cyo kurangura. Baza ku murongo wa telephone kugira ngo ubone ibiciro by'ubwinshi.</p>
+        </details>
+        <details class="lang-fr faq-item reveal" style="display:none;">
+          <summary>Vendez-vous en vrac ou en gros ?</summary>
+          <p>Oui — de nombreux articles comme le riz, la farine et l'huile sont disponibles en sacs et en grands contenants à des prix de gros avantageux. Renseignez-vous au comptoir pour les tarifs de gros.</p>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+<!-- ===== TEAM ===== -->
+<section class="team" id="team">
+  <div class="section-inner">
+    <p class="eyebrow center lang-en">Meet The Team</p>
+    <p class="eyebrow center lang-rw" style="display:none;">Menya Itsinda</p>
+    <p class="eyebrow center lang-fr" style="display:none;">Rencontrez l'équipe</p>
+    
+    <h2 class="center reveal lang-en">The People Behind Marie Rose Shop</h2>
+    <h2 class="center reveal lang-rw" style="display:none;">itsinda ry'abafatanyabikorwa ba Marie Rose</h2>
+    <h2 class="center reveal lang-fr" style="display:none;">Le groupe des partenaires de Marie Rose</h2>
+
+    <!-- ===== TEAM HEADER CAROUSEL - INFINITE HORIZONTAL SLIDER ===== -->
+    <div class="team-header-carousel" id="teamHeaderCarousel">
+      <div class="team-header-track" id="teamHeaderTrack">
+        
+        <!-- Slide 1 - Team Group Photo -->
+        <div class="team-header-slide active" data-slide="0">
+          <img src="images/web.png" alt="Marie Rose Shop Team" loading="lazy" data-group="team">
+          <div class="team-header-title">
+            Our Amazing Team
+            <span class="sub">Together we serve our community</span>
+          </div>
+          <span class="team-zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        
+        <!-- Slide 2 - Marie Rose -->
+        <div class="team-header-slide" data-slide="1">
+          <img src="images/wg.png" alt="Marie Rose - Owner" loading="lazy" data-group="team">
+          <div class="team-header-title">
+            Marie Rose
+            <span class="sub">Manager &amp; Cashier</span>
+          </div>
+          <span class="team-zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        
+        <!-- Slide 3 - Gikundiro Pierrot -->
+        <div class="team-header-slide" data-slide="2">
+          <img src="images/fc.png" alt="Gikundiro Pierrot - EBM Provider" loading="lazy" data-group="team">
+          <div class="team-header-title">
+            Gikundiro Pierrot
+            <span class="sub">EBM Provider</span>
+          </div>
+          <span class="team-zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        
+        <!-- Slide 4 - Gisubizo Bienfait -->
+        <div class="team-header-slide" data-slide="3">
+          <img src="images/rb.png" alt="Gisubizo Bienfait - Import & Sourcing" loading="lazy" data-group="team">
+          <div class="team-header-title">
+            Gisubizo Bienfait
+            <span class="sub">Import &amp; Sourcing</span>
+          </div>
+          <span class="team-zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+        
+        <!-- Slide 5 - Jean Pierre -->
+        <div class="team-header-slide" data-slide="4">
+          <img src="images/gg.png" alt="Jean Pierre - Import & Sourcing" loading="lazy" data-group="team">
+          <div class="team-header-title">
+            Jean Pierre
+            <span class="sub">Import &amp; Sourcing</span>
+          </div>
+          <span class="team-zoom-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            View
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="team-header-progress" id="teamHeaderProgress"></div>
+      
+      <!-- Slide Counter -->
+      <span class="team-header-counter" id="teamHeaderCounter">1 / 5</span>
+
+      <!-- Navigation Arrows -->
+      <button class="team-header-arrow prev" id="teamHeaderPrev" aria-label="Previous slide">&#10094;</button>
+      <button class="team-header-arrow next" id="teamHeaderNext" aria-label="Next slide">&#10095;</button>
+    </div>
+
+    <!-- Dots -->
+    <div class="team-header-dots" id="teamHeaderDots"></div>
+
+    <!-- ===== TEAM CARDS (UNCHANGED) ===== -->
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div><a href="#" onclick="openLightbox(this); return false;"><img src="images/jj.jpeg" alt="Marie Rose, owner" loading="lazy" data-group="team"></a></div>
+        <h4>Marie Rose</h4>
+        <p class="team-role lang-en">Manager &amp; Cashier</p>
+        <p class="team-role lang-rw" style="display:none;">Umuyobozi &amp; Akanakira amafaranga</p>
+        <p class="team-role lang-fr" style="display:none;">Gérante &amp; Caissière</p>
+        <p class="lang-en">She personally receives and manages all money coming in.</p>
+        <p class="lang-rw" style="display:none;">Ni we wakira akanacunga amafaranga yose yinjira.</p>
+        <p class="lang-fr" style="display:none;">Elle reçoit et gère elle-même tout l'argent qui entre.</p>
+      </div>
+      <div class="team-card reveal">
+        <div><a href="#" onclick="openLightbox(this); return false;"><img src="images/ff.jpeg" alt="Gikundiro Pierrot, EBM provider" loading="lazy" data-group="team"></a></div>
+        <h4>Gikundiro Pierrot</h4>
+        <p class="team-role lang-en">EBM Provider</p>
+        <p class="team-role lang-rw" style="display:none;">Utanga Servisi za EBM</p>
+        <p class="team-role lang-fr" style="display:none;">Fournisseur EBM</p>
+        <p class="lang-en">Responsible for issuing official EBM receipts to every client.</p>
+        <p class="lang-rw" style="display:none;">Ashinzwe gutanga servisi za EBM zemewe ku bakiriya bose.</p>
+        <p class="lang-fr" style="display:none;">Responsable de la délivrance des reçus officiels EBM à chaque client.</p>
+      </div>
+      <div class="team-card reveal">
+        <div><a href="#" onclick="openLightbox(this); return false;"><img src="images/yy.jpeg" alt="Gisubizo Bienfait, sourcing" loading="lazy" data-group="team"></a></div>
+        <h4>Gisubizo Bienfait</h4>
+        <p class="team-role lang-en">Import &amp; Sourcing</p>
+        <p class="team-role lang-rw" style="display:none;">Gutumiza &amp; Kubona Ibicuruzwa</p>
+        <p class="team-role lang-fr" style="display:none;">Importation &amp; Approvisionnement</p>
+        <p class="lang-en">Travels abroad to source quality products at wholesale prices.</p>
+        <p class="lang-rw" style="display:none;">Ajya mu mahanga gushaka ibicuruzwa byiza ku giciro cyo kurangura.</p>
+        <p class="lang-fr" style="display:none;">Voyage à l'étranger pour trouver des produits de qualité à prix de gros.</p>
+      </div>
+      <div class="team-card reveal">
+        <div><a href="#" onclick="openLightbox(this); return false;"><img src="images/dd.jpeg" alt="Jean Pierre, sourcing" loading="lazy" data-group="team"></a></div>
+        <h4>Jean Pierre</h4>
+        <p class="team-role lang-en">Import &amp; Sourcing</p>
+        <p class="team-role lang-rw" style="display:none;">Gutumiza &amp; Kubona Ibicuruzwa</p>
+        <p class="team-role lang-fr" style="display:none;">Importation &amp; Approvisionnement</p>
+        <p class="lang-en">Travels abroad to source quality products at wholesale prices.</p>
+        <p class="lang-rw" style="display:none;">Ajya mu mahanga gushaka ibicuruzwa byiza ku giciro cyo kurangura.</p>
+        <p class="lang-fr" style="display:none;">Voyage à l'étranger pour trouver des produits de qualité à prix de gros.</p>
+      </div>
+    </div>
+
+    <!-- Team Scripture Banner -->
+    <div class="team-scripture-banner reveal">
+      <!-- English -->
+      <div class="lang-en">
+        <p class="scripture-text">We can do all things through Christ,<br>who strengthens us.</p>
+        <p class="scripture-ref">Philippians 4:13</p>
+      </div>
+      <!-- Kinyarwanda -->
+      <div class="lang-rw" style="display:none;">
+        <p class="scripture-text">Dushobozwa byose na Kristo,<br>uduha imbaraga.</p>
+        <p class="scripture-ref">Abafilipi 4:13</p>
+      </div>
+      <!-- French -->
+      <div class="lang-fr" style="display:none;">
+        <p class="scripture-text">Nous pouvons tout faire grâce au Christ,<br>qui nous donne la force.</p>
+        <p class="scripture-ref">Philippiens 4:13</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- ===== SHOPPING LIST ===== -->
+  <section class="shopping-list" id="shopping-list">
+    <div class="section-inner">
+      <p class="eyebrow center lang-en">Plan Your Visit</p>
+      <p class="eyebrow center lang-rw" style="display:none;">Kora Urutonde rwawe</p>
+      <p class="eyebrow center lang-fr" style="display:none;">Planifiez votre visite</p>
+      
+      <h2 class="center reveal lang-en">Your Digital Shopping List</h2>
+      <h2 class="center reveal lang-rw" style="display:none;">Urutonde rw’Ibyo Mugura </h2>
+      <h2 class="center reveal lang-fr" style="display:none;">Votre liste de courses numérique</h2>
+      
+      <p class="section-lede center lang-en">Tap "Add to list" on any product to build your shopping list before you visit. Your list is saved on this device.</p>
+      <p class="section-lede center lang-rw" style="display:none;">Kanda "Add" kuri buri icuruzwa.</p>
+      <p class="section-lede center lang-fr" style="display:none;">Appuyez sur "Ajouter à la liste" sur n'importe quel produit pour construire votre liste de courses avant votre visite. Votre liste est enregistrée sur cet appareil.</p>
+      
+      <div class="list-app">
+        <div class="list-input-row">
+          <input type="text" id="listInput" placeholder="Add an item (e.g., Rice, Oil, Soap)..." autocomplete="off">
+          <button id="listAdd" class="btn btn-primary">Add</button>
+        </div>
+        <ul id="listItems" class="list-items"></ul>
+        <div class="list-empty" id="listEmpty">Your list is empty. Browse products above and click "Add to list".</div>
+        <div class="list-total" id="listTotal" style="display:none;">
+          <span class="list-total-label lang-en">Estimated Total</span>
+          <span class="list-total-label lang-rw" style="display:none;">Igiteranyo</span>
+          <span class="list-total-label lang-fr" style="display:none;">Total estimé</span>
+          <span class="list-total-amount" id="listTotalAmount">0 <span class="list-total-currency">RWF</span></span>
+        </div>
+        <div class="list-actions" id="listActions" style="display:none;">
+          <button id="listCopy" class="btn btn-ghost">Copy List</button>
+          <button id="listClear" class="btn btn-ghost">Clear All</button>
+          <a href="https://wa.me/250789542601" target="_blank" rel="noopener" class="btn btn-whatsapp" id="listWhatsApp">Send List via WhatsApp</a>
+        </div>
+        <div class="payment-note">
+          <svg viewBox="0 0 24 24" class="payment-note-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <p>
+            <span class="lang-en">We confirm your order on WhatsApp, then you pay by <strong>MoMo Pay on 2003223</strong> or <strong>Mobile Money (MoMo) on 0789542601</strong> on pickup.</span>
+            <span class="lang-rw" style="display:none;">Twemeza  ibyo watanze (komande) binyuze kuri WhatsApp, hanyuma ukishyura kuri <strong>MoMo Pay Kuri 2003223</strong> cyangwa <strong>Mobile Money (MoMo)</strong> Kuri 0789542601</strong> Mu gihe ushaka ibyo watumije.</span>
+            <span class="lang-fr" style="display:none;">Nous confirmons votre commande sur WhatsApp, puis vous payez en <strong>MoMo Pay au 2003223</strong> ou par <strong>Mobile Money (MoMo)</strong> au 0789542601</strong> à la livraison.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="weave-divider" aria-hidden="true"></div>
+
+  <!-- ===== REQUEST PRODUCT ===== -->
+  <section class="request-product" id="request">
+    <div class="section-inner">
+      <div class="request-card reveal">
+        <div class="request-text">
+          <p class="eyebrow lang-en">Can't Find Something?</p>
+          <p class="eyebrow lang-rw" style="display:none;">Nutabona igicuruzwa ukeneye?</p>
+          <p class="eyebrow lang-fr" style="display:none;">Vous ne trouvez pas quelque chose ?</p>
+          <h2 class="lang-en">Request a Product</h2>
+          <h2 class="lang-rw" style="display:none;">Saba igicuruzwa ukeneye</h2>
+          <h2 class="lang-fr" style="display:none;">Demander un produit</h2>
+          <p class="lang-en">If you need an item we don't currently stock, let us know. Our import team travels regularly and can often source it on their next trip.</p>
+          <p class="lang-rw" style="display:none;">Niba ukeneye ikintu tudafite mu iduka, tubwire. Itsinda ryacu rijya mu mahanga kenshi.</p>
+          <p class="lang-fr" style="display:none;">Si vous avez besoin d'un article que nous n'avons pas en stock, faites-le nous savoir. Notre équipe d'importation voyage régulièrement et peut souvent se le procurer lors de son prochain voyage.</p>
+          <form id="requestForm" class="request-form">
+            <input type="text" id="reqName" placeholder="Your name" required>
+            <input type="text" id="reqItem" placeholder="Product you are looking for" required>
+            <button type="submit" class="btn btn-primary lang-en">Send Request via WhatsApp</button>
+            <button type="submit" class="btn btn-primary lang-rw" style="display:none;">Ohereza ubutumwa kuri WhatsApp</button>
+            <button type="submit" class="btn btn-primary lang-fr" style="display:none;">Envoyer la demande via WhatsApp</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="weave-divider" aria-hidden="true"></div>
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer" id="contact">
+  <div class="section-inner footer-grid">
+    <div>
+      <p class="eyebrow lang-en">Visit Us</p>
+      <p class="eyebrow lang-rw" style="display:none;">Mudusure</p>
+      <p class="eyebrow lang-fr" style="display:none;">Visitez-nous</p>
+      
+      <h2 class="lang-en">Visit Marie Rose Shop</h2>
+      <h2 class="lang-rw" style="display:none;">Sura Marie Rose Shop</h2>
+      <h2 class="lang-fr" style="display:none;">Visitez Marie Rose Shop</h2>
+      
+      <p class="footer-address">Kabuye Cell, Jabana Sector<br>Gasabo District, Kigali City, Rwanda <br>Find us in Kabuye, just below the Kabuye Parish Church</p>
+      <div class="footer-hours">
+        <strong class="lang-en">Opening Hours</strong>
+        <strong class="lang-rw" style="display:none;">Amasaha yo gufungura</strong>
+        <strong class="lang-fr" style="display:none;">Heures d'ouverture</strong>
+        <ul>
+          <li><span>Mon – Sat</span><span>7:00 AM – 21:30 PM</span></li>
+          <li><span>Sunday</span><span>7:00 AM – 21:00 PM</span></li>
+        </ul>
+      </div>
+  
+
+      <div class="footer-form">
+        <h4 class="lang-en">Or send us a quick message</h4>
+        <h4 class="lang-rw" style="display:none;">Cyangwa Utwoherereze ubutumwa bugufi</h4>
+        <h4 class="lang-fr" style="display:none;">Ou envoyez-nous un message rapide</h4>
+        <form id="contactForm">
+          <input type="text" id="cfName" placeholder="Your name" required>
+          <textarea id="cfMessage" placeholder="What do you need?" required></textarea>
+          <button type="submit" class="lang-en">Send via WhatsApp</button>
+          <button type="submit" class="lang-rw" style="display:none;">Ohereza kuri WhatsApp</button>
+          <button type="submit" class="lang-fr" style="display:none;">Envoyer via WhatsApp</button>
+        </form>
+        <p class="form-note">Opens WhatsApp with your message pre-filled — nothing is stored on this site.</p>
+      </div>
+    </div>
+       <div class="footer-media">
+    <!-- ===== MULTI-LINGUAL FOOTER IMAGES ===== -->
+    
+    <!-- English Image Wrapper -->
+    <div onclick="openLightbox(this)" class="lang-en">
+        <img src="images/bv.png" alt="Philippians 4:13 - English" class="team-header-img" data-group="footer-verse" loading="lazy">
+    </div>
+    
+    <!-- Kinyarwanda Image Wrapper -->
+    <div onclick="openLightbox(this)" class="lang-rw" style="display:none;">
+        <img src="images/qu.png" alt="Abafilipi 4:13 - Kinyarwanda" class="team-header-img" data-group="footer-verse" loading="lazy">
+    </div>
+    
+    <!-- French Image Wrapper -->
+    <div onclick="openLightbox(this)" class="lang-fr" style="display:none;">
+        <img src="images/qt.png" alt="Philippiens 4:13 - Français" class="team-header-img" data-group="footer-verse" loading="lazy">
+    </div>
+
+    <!-- ===== SCRIPTURE BANNER BELOW THE IMAGE ===== -->
+    <div class="footer-scripture-banner">
+        <span class="banner-cross" aria-hidden="true">✝</span>
+        
+        <!-- English -->
+        <div class="lang-en">
+            <p class="scripture-text">We can do all things through Christ,<br>who strengthens us.</p>
+            <p class="scripture-ref">Philippians 4:13</p>
+            <span class="divider-line"></span>
+            
+            <div class="scripture-pillars">
+                <div class="pillar">
+                    <span class="pillar-icon">🛡️</span>
+                    <span class="pillar-text">God is my helper</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">⚡</span>
+                    <span class="pillar-text">Power from above</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">🤝</span>
+                    <span class="pillar-text">Fear not, He is with me</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">❤️</span>
+                    <span class="pillar-text">Amazing love</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Kinyarwanda -->
+        <div class="lang-rw" style="display:none;">
+            <p class="scripture-text">Dushobozwa byose na Kristo,<br>uduha imbaraga.</p>
+            <p class="scripture-ref">Abafilipi 4:13</p>
+            <span class="divider-line"></span>
+            
+            <div class="scripture-pillars">
+                <div class="pillar">
+                    <span class="pillar-icon">🛡️</span>
+                    <span class="pillar-text">Imana niyo mfasha</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">⚡</span>
+                    <span class="pillar-text">Imbaraga zivuye hejuru</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">🤝</span>
+                    <span class="pillar-text">Ntitinya kuko ari kumwe nanjye</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">❤️</span>
+                    <span class="pillar-text">Urukundo rutangara</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- French -->
+        <div class="lang-fr" style="display:none;">
+            <p class="scripture-text">Nous pouvons tout faire grâce au Christ,<br>qui nous donne la force.</p>
+            <p class="scripture-ref">Philippiens 4:13</p>
+            <span class="divider-line"></span>
+            
+            <div class="scripture-pillars">
+                <div class="pillar">
+                    <span class="pillar-icon">🛡️</span>
+                    <span class="pillar-text">Dieu est mon aide</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">⚡</span>
+                    <span class="pillar-text">Puissance d'en haut</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">🤝</span>
+                    <span class="pillar-text">Sans crainte, Il est avec moi</span>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-icon">❤️</span>
+                    <span class="pillar-text">Amour extraordinaire</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <div class="footer-bottom">
+    <p>© <span id="year"></span> Marie Rose Shop — Kabuye, Jabana, Gasabo, Kigali. Built with care.</p>
+  </div>
+</footer>
+
+ <!-- NEW CODE - KEEP THIS -->
+<div id="ai-chat-widget">
+  <button id="ai-chat-toggle" aria-label="Open AI Assistant">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+  </button>
+  <div id="ai-chat-popup" class="chat-hidden">
+    <div class="chat-header">
+      <div class="chat-title">
+        <span class="chat-avatar">🤖</span>
+        <div>
+          <span class="chat-name">Marie's AI Assistant</span>
+          <span class="chat-status">Online</span>
+        </div>
+      </div>
+      <button id="chat-close-btn">&times;</button>
+    </div>
+    <div class="chat-body">
+      <div class="chat-message bot">
+        <div class="bubble">Hello! 👋 I'm the virtual assistant for Marie Rose Shop. How can I help you today?</div>
+      </div>
+      <div class="chat-message bot">
+        <div class="bubble">You can ask me about our products, store hours, location, or current stock!</div>
+      </div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" id="chat-input" placeholder="Ask me anything..." autocomplete="off">
+      <button id="chat-send-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+  <button id="backToTop" class="back-to-top" aria-label="Back to top">↑</button>
+
+   <!-- ===== PWA INSTALL PROMPT BANNER ===== -->
+  <div id="installBanner" class="install-banner" role="dialog" aria-live="polite" aria-label="Install app">
+    <div class="install-banner-icon">
+        <img src="apple-touch-icon.png" alt="Marie Rose Shop" style="width: 40px; height: 40px; border-radius: 8px;">
+    </div>
+    <div class="install-banner-text">
+      <strong id="installBannerTitle">Install Marie Rose Shop</strong>
+      <span id="installBannerSubtitle">Add it to your home screen for one-tap access, even offline.</span>
+    </div>
+    <div class="install-banner-actions">
+      <button type="button" id="installBannerBtn" class="install-banner-btn">Install</button>
+      <button type="button" id="installBannerClose" class="install-banner-close" aria-label="Dismiss">&times;</button>
+    </div>
+  </div>
+
+  <div class="toast" id="searchToast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Renders all product cards from products.json into .categories-stage.
+     Must load BEFORE script.js (which searches/filters those cards) and
+     must NOT use defer or async, so it finishes before script.js runs. -->
+<script src="products-render.js?v=20260913-1"></script>
+<script src="script.js?v=20260913-1"></script>
+
+  <!-- PWA: register service worker for offline support + installability.
+       This also keeps the site fresh on every device: sw.js fetches HTML "network-first"
+       (so a normal refresh always checks for new content) and takes over immediately on
+       update (skipWaiting + clients.claim), instead of holding on to an old cached copy
+       until someone does a hard refresh. If a new version is found while a page is already
+       open, we show a small "Refresh" banner instead of yanking the page out from under
+       anyone mid-scroll or mid-form. -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').then(function (reg) {
+          // Ask immediately, then keep checking while the tab stays open.
+          reg.update();
+          setInterval(function () { reg.update(); }, 30 * 60 * 1000);
+
+          reg.addEventListener('updatefound', function () {
+            var newWorker = reg.installing;
+            if (!newWorker) return;
+            newWorker.addEventListener('statechange', function () {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                showUpdateBanner(newWorker);
+              }
+            });
+          });
+        }).catch(function (err) {
+          console.warn('Service worker registration failed:', err);
+        });
+
+        var refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+      });
+
+      function showUpdateBanner(worker) {
+        if (document.getElementById('updateBanner')) return;
+        var bar = document.createElement('div');
+        bar.id = 'updateBanner';
+        bar.className = 'update-banner';
+        bar.innerHTML =
+          '<span>A newer version of this page is available.</span>' +
+          '<button type="button" id="updateBannerBtn">Refresh</button>';
+        document.body.appendChild(bar);
+        requestAnimationFrame(function () { bar.classList.add('show'); });
+        document.getElementById('updateBannerBtn').addEventListener('click', function () {
+          worker.postMessage('SKIP_WAITING');
+        });
+      }
+    }
+  </script>
+</body>
+</html>
