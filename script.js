@@ -1301,7 +1301,7 @@
     const matches = findProductMatches(qLower);
 
     if (!matches.length) {
-      if (lang === 'rw') return "Nta gicuruzwa nabonye gihuye na cyo muri iki gihe. Twandikire kuri WhatsApp (+250 789 542 601) tukareba ko itsinda ryacu ryakizana. 🙏";
+      if (lang === 'rw') return "Nta gicuruzwa kiboneka gihuye n'icyo murigushaka. Twandikire kuri WhatsApp (+250 789 542 601) tube ko ubutaha itsinda ryacu ryakizana. 🙏";
       if (lang === 'fr') return "Je n'ai pas trouvé cet article précis chez nous en ce moment. Contactez-nous sur WhatsApp (+250 789 542 601) et notre équipe pourra vérifier si elle peut l'importer. 🙏";
       return "I couldn't find that exact item in our current catalog. Message us on WhatsApp (+250 789 542 601) and our sourcing team can check if they can bring it in. 🙏";
     }
@@ -1336,7 +1336,7 @@
 
   const JAILBREAK_REPLIES = {
     en: "I'm just the Marie Rose Shop assistant, so I can't take on a different role or ignore how I'm set up — but I'm glad to help with anything about our products, hours, or location! 😊",
-    rw: "Ndi umufasha wa Marie Rose Shop gusa, ntabwo nshobora guhindura uwo ndi we cyangwa kwirengagiza uko nakozwe — ariko nishimira kukubwira ibijyanye n'ibicuruzwa byacu, amasaha, cyangwa aho tuherereye! 😊",
+    rw: "Ndi umufasha wa Marie Rose Shop gusa, ntabwo nshobora guhindura uwo ndi we cyangwa kwirengagiza uko nakozwe — ariko nishimira kukubwira ibijyanye n'ibicuruzwa byacu, amasaha, cyangwa aho dukorera! 😊",
     fr: "Je suis seulement l'assistant de Marie Rose Shop, donc je ne peux pas changer de rôle ou ignorer ma configuration — mais je serai ravi de vous aider avec nos produits, nos horaires ou notre emplacement ! 😊"
   };
 
@@ -1360,7 +1360,7 @@
 
   const IMPOSSIBLE_REPLIES = {
     en: "Ha, good question — but no, we're a neighbourhood grocery and household-goods shop, so that's outside what we carry! 😄 If you meant something else, ask away, or WhatsApp us at +250 789 542 601.",
-    rw: "Haha, ikibazo cyiza — ariko oya, turi iduka rigurisha ibiribwa n'ibikoresho byo mu rugo, rero ibyo si mu byo dufite! 😄 Niba wari ushaka ikindi kintu, mbaza, cyangwa twandikire kuri WhatsApp +250 789 542 601.",
+    rw: "Ubajije ikibazo cyiza — ariko ntabyo dufite, turi iduka rigurisha ibiribwa n'ibikoresho byo mu rugo, rero ibyo si mu byo dufite! 😄 Niba washakaga ushaka ikindi kintu, mbaza, cyangwa utwandikire kuri WhatsApp +250 789 542 601.",
     fr: "Ha, bonne question — mais non, nous sommes une épicerie de quartier, donc ce n'est pas quelque chose que nous vendons ! 😄 Si vous vouliez dire autre chose, n'hésitez pas à demander, ou contactez-nous sur WhatsApp au +250 789 542 601."
   };
 
@@ -1382,7 +1382,7 @@
 
   const GIBBERISH_REPLIES = {
     en: "I couldn't quite understand that! Could you try asking in a few words — for example 'what time do you open' or 'do you have rice'?",
-    rw: "Sinabashije gusobanukirwa neza! Wagerageza kubaza mu magambo make — urugero 'mufungura saa zingahe' cyangwa 'mfite umuceri'?",
+    rw: "Sinabashije gusobanukirwa neza! Wagerageza kubaza mu magambo make — urugero 'mufungura saa ngahe' cyangwa 'mufite umuceri'?",
     fr: "Je n'ai pas bien compris ! Pourriez-vous reformuler en quelques mots — par exemple 'à quelle heure ouvrez-vous' ou 'avez-vous du riz' ?"
   };
 
@@ -1507,23 +1507,23 @@
         return "Muraho! 😊 Niba ukeneye ikindi, andika 'Muraho' kugira ngo ukomeze ikiganiro. Mube numunsi mwiza!";
       }
       if (q.includes('uri nde') || q.includes('ni nde') || q.includes('izina')) {
-        return "Ndi umuyobozi wa AI wa Marie Rose Shop! 🤖 Nakozwe kugira ngo nkubafashe gusubiza byihuse ibibazo by'ibicuruzwa, aho duherereye, n'amasaha.";
+        return "Ndi umuyobozi wa AI wa Marie Rose Shop! 🤖 Nakozwe kugira ngo nkubafashe gusubiza byihuse ibibazo by'ibicuruzwa, aho duherereye, n'amasaha dufunguraho cyangwa dufungiraho.";
       }
       const productAnswerRw = tryAnswerProductQuestion(q, 'rw');
       if (productAnswerRw) return productAnswerRw;
       if (q.includes('amasaha') || q.includes('gufungura') || q.includes('gufunga') || q.includes('saa') || q.includes('irafungura')) {
-        return "Dufunguye iminsi 7 mu cyumweru! 🕘<br><br>• <b>Kuwa mbere - Kuwa gatandatu:</b> 7:00 AM – 9:30 PM<br>• <b>Ku cyumweru:</b> 7:30 AM – 9:00 PM";
+        return "Dufungura mu minsi 7 mu cyumweru! 🕘<br><br>• <b>Kuwa mbere - Kuwa gatandatu:</b> 7:00 AM – 9:30 PM<br>• <b>Ku cyumweru:</b> 7:30 AM – 9:00 PM";
       }
       if (q.includes('herereye') || q.includes('ahe') || q.includes('adresse') || q.includes('shaka') || q.includes('ho')) {
-        return "Tuherereye i <b>Kabuye, Umurenge wa Jabana, Akarere ka Gasabo, Umujyi wa Kigali, Rwanda</b>.<br><br>Mushobora kutubona hepfo y'<b>Itorero rya Kabuye (Paroisse)</b>. Ni byoroshye kutubona! 😊";
+        return "Duherereye i <b>Kabuye, Mu murenge wa Jabana, Akarere ka Gasabo, Umujyi wa Kigali, Rwanda</b>.<br><br>Mushobora kutubona hepfo y'<b>Itorero rya Kabuye (Paroisse)</b>. Ni byoroshye kutubona! 😊";
       }
       if (q.includes('kwishyura') || q.includes('amafaranga') || q.includes('momo') || q.includes('ishyura')) {
-        return "Twakira amafaranga (Cash), MTN Mobile Money (MoMo Pay), na Airtel Money. Buri kigurishwa cyose giterwa inyemezabwishyu ya EBM.";
+        return "Twakira amafaranga (Cash), MTN Mobile Money (MoMo Pay), na Airtel Money. Kuri buri kigurishijwe cyose tuguha inyemezabwishyu ya EBM.";
       }
       if (q.includes('gutwara') || q.includes('kugera') || q.includes('gurisha mu rugo')) {
         return "Kuri ubu, dukora nk'iduka ryo mu gace ryakira abakiriya batugana. Ntabwo dutanga serivisi yo kugeza ibicuruzwa mu rugo, ariko mwaduhamagara cyangwa mukatwandikira kuri WhatsApp mumenye ko ibyo mukeneye bihari.";
       }
-      if (q.includes('gusaba') || q.includes('keneye') || q.includes('kidafite')) {
+      if (q.includes('gusaba') || q.includes('keneye') || q.includes('mudafite')) {
         return "Yego! Niba ukeneye ikintu runaka, tubwire kuri WhatsApp cyangwa ku murongo wa telephone. Itsinda ryacu rijya kurangura hanze kenshi, rikaba rishobora kukibazanira.";
       }
       if (q.includes('kurangura') || q.includes('wholesale') || q.includes('sack')) {
@@ -1539,33 +1539,33 @@
         return "Mushobora kutugiraho ibihe byose! 📞<br><br>• <b>Guhamagara cyangwa WhatsApp:</b> +250 789 542 601<br>• <b>Kudusura:</b> Kabuye, munsi y'Itorero rya Kabuye.<br><br>Turasubiza vuba! 💬";
       }
       if (q.includes('wakureze') || q.includes('wakoze') || q.includes('umurenge') || q.includes('gikundiro') || q.includes('pierrot')) {
-        return "Umukoresha wakoze urubuga ni Gikundiro Pierrot. Yihanga mu gukora no gushushanya urubuga rukomeye kandi rwiza, ndetse no mu bubiko bw'amakuru. Ubuhamya bwe bugera ku nzego zose zo gukora urubuga! 🚀";
+        return "Umu developer wubatse uru rubuga ni Gikundiro Pierrot. Afite ubumenyi buhagije mu gukora no gushushanya imbuga zikomeye kandi nziza, ndetse n'ububiko bw'amakuru(database). Ubuhamya bwe mu kubaka imbuga n'ama system bugera ku nzego zose! 🚀";
       }
       if (q.includes('gusubiza') || q.includes('kugarura') || q.includes('sinishimiye') || q.includes('ntacyo')) {
-        return "Niba hari ikintu kitagenze neza ku byo waguze, garuka n'inyemezabwishyu ya EBM vuba bishoboka, tuzabikemura — kwishyura, guhindura, cyangwa gusimbuza. Baza Marie Rose cyangwa Pierrot ku isanduku.";
+        return "Niba hari ikintu kitagenze neza ku byo waguze, garuka n'inyemezabwishyu ya EBM vuba hakiri kare, tuzabikemura — kwishyura, guhindura, cyangwa kuguhindurira. Baza Marie Rose cyangwa undi mukozi wese mu iduka.";
       }
       if (q.includes('kwangirika') || q.includes('igihe kirenze') || q.includes('gishya')) {
-        return "Dukurikirana ibicuruzwa byacu buri gihe kandi tugasubiramo mu cyumweru, bityo byose bigurishwa biracyafite igihe cyabyo. Niba wabonye ikintu cyegereje igihe cyacyo, tubwire — tuzashimira kubimenya!";
+        return "Dukurikirana ibicuruzwa byacu buri gihe kandi tukavugurura buri cyumweru, bityo ibicuruzwa byacu byose biba aribishya kandi bifite ubuzirantenge. Niba hari ikintu ubonye kegereje igihe cyangwa cyarengeje igihe cyacyo, tubwire — tuzagufasha!";
       }
       if (q.includes('ibirimo') || q.includes('allergie') || q.includes('gluten')) {
-        return "Dushobora kureba hamwe na wowe ibirimo mu gicuruzwa runaka ku isanduku — tubwire icyo kintu, tuzagusobanurira uko bishoboka kose.";
+        return "Dushobora kurebera hamwe nawe ibirimo mu bicuruzwa runaka ku iduka — tubwire icyo kintu, tuzagusobanurira uko bishoboka kose.";
       }
       if (q.includes('umurimo') || q.includes('akazi') || q.includes('gukora hano')) {
-        return "Ni byiza ko ubishaka! Nta sisitemu yo gusaba akazi kuri interineti dufite, ariko wasura iduka ukabaza Marie Rose niba hari umwanya uhari.";
+        return "Ni byiza ko ubishaka! Nta sisitemu yo gusaba akazi kuri interineti dufite, ariko wasura iduka ukabaza Marie Rose niba hari umwanya uhari cyangwa ukatwandikira kuri whatsapp 0789542601.";
       }
       if (q.includes('igabanuka') && (q.includes('uyu munsi') || q.includes('nonaha'))) {
-        return "Ntabwo dukora ibiciro by'igihe gito, ariko ibiciro byacu bya buri munsi biramaze kuba byiza kandi bihamye. Baza ku isanduku niba hari amasezerano y'ubwinshi ku gicuruzwa runaka.";
+        return "Ntabwo dushyiraho ibiciro by'igihe gito, ariko ibiciro byacu bya buri munsi ni byiza kandi birihasi cyane. Baza ku iduka niba ushaka kurangura byinshi turumvikana nta kibazo.";
       }
       if (q.includes('izindi duka') || q.includes('gereranya')) {
-        return "Ntidushobora kuvuga ku yandi maduka, ariko twibanda ku biciro byizewe bihamye, inyemezabwishyu ya EBM, n'ibicuruzwa byiza biva ahantu heza.";
+        return "Ntidushobora kuvuga ku yandi maduka, ariko twibanda ku biciro byizewe bihamye, inyemezabwishyu ya EBM, n'ibicuruzwa byiza guturuka ahantu heza.";
       }
       if (q.includes('igihe kizaba gihari') || q.includes('kongera kuzana') || q.includes('nta gicuruzwa')) {
-        return "Dusubiramo ibicuruzwa buri cyumweru. Niba hari ikintu kidahari ubu, twandikire kuri WhatsApp (+250 789 542 601) tukubwire igihe kizaboneka.";
+        return "Dushyiramo ibicuruzwa buri cyumweru. Niba hari ikintu kidahari ubu, uratwandikira kuri WhatsApp (+250 789 542 601) tukakubwira igihe kizabonekera.";
       }
       if (q.includes('ubukwe') || q.includes('ibirori') || q.includes('itsinda ry\'ibicuruzwa')) {
         return "Yego, dushobora kugufasha mu bicuruzwa byinshi ku birori! Twandikire kuri WhatsApp mbere y'igihe (+250 789 542 601) kugira ngo tumenye neza ko dufite ibihagije.";
       }
-      return "Nubwo nta nyishu nyuzuye nfite ubu, mushobora guhamagara cyangwa kutwandikira kuri WhatsApp kuri +250 789 542 601, cyangwa kudusura mu iduka i Kabuye (munsi y'Itorero rya Kabuye). Itsinda ryacu rishobora kubafasha! 😊";
+      return "Nubwo nta gisubizo k'ibyo mubajije mfite nonaha, mushobora guhamagara cyangwa kutwandikira kuri WhatsApp kuri +250 789 542 601, cyangwa kudusura ku iduka i Kabuye (munsi y'Itorero rya Kabuye). Itsinda ryacu rihari kubafasha! 😊";
     }
 
     else if (lang === 'fr') {
