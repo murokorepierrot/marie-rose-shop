@@ -71,6 +71,15 @@
        style.css or script.js and push to GitHub. Changing the query string forces every
        browser/device to fetch the new file instead of reusing an old cached copy. -->
  <link rel="stylesheet" href="style.css?v=20260826-3">
+ <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5CBPRNHGSY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5CBPRNHGSY');
+</script>
 
   <!-- Structured Data for Google Search -->
   <script type="application/ld+json">
@@ -1667,6 +1676,7 @@
      must NOT use defer or async, so it finishes before script.js runs. -->
 <script src="products-render.js?v=20260903-1"></script>
 <script src="script.js?v=20260831-1"></script>
+    <script src="analytics-events.js?v=20260913-1"></script>
 
   <!-- PWA: register service worker for offline support + installability.
        This also keeps the site fresh on every device: sw.js fetches HTML "network-first"
