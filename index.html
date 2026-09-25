@@ -19,6 +19,7 @@
 
   <!-- Canonical -->
   <link rel="canonical" href="https://murokorepierrot.github.io/marie-rose-shop/">
+  
 
 
 <meta name="msvalidate.01" content="F418770C0C85A74B8C16AB09FC35C4DF" />
@@ -70,7 +71,7 @@
   <!-- SITE_VERSION cache-buster: bump this value (e.g. to today's date) every time you edit
        style.css or script.js and push to GitHub. Changing the query string forces every
        browser/device to fetch the new file instead of reusing an old cached copy. -->
- <link rel="stylesheet" href="style.css?v=20260826-3">
+ <link rel="stylesheet" href="style.css?v=20260913-1">
  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-5CBPRNHGSY"></script>
 <script>
@@ -298,12 +299,12 @@
         <a href="#contact" class="lang-en">Visit Us</a>
 
         <!-- Kinyarwanda Links -->
-        <a href="#about" class="lang-rw" style="display:none;">Ibitwerekeyeho</a>
+        <a href="#about" class="lang-rw" style="display:none;">Ibyerekeye</a>
         <a href="#products" class="lang-rw" style="display:none;">Ibicuruzwa</a>
-        <a href="#gallery" class="lang-rw" style="display:none;">Amafoto</a>
+        <a href="#gallery" class="lang-rw" style="display:none;">Amashusho</a>
         <a href="#team" class="lang-rw" style="display:none;">Itsinda</a>
         <a href="#faq" class="lang-rw" style="display:none;">Ibibazo</a>
-        <a href="#contact" class="lang-rw" style="display:none;">Mudusure</a>
+        <a href="#contact" class="lang-rw" style="display:none;">Tusura</a>
 
         <!-- French Links -->
         <a href="#about" class="lang-fr" style="display:none;">À propos</a>
@@ -699,6 +700,8 @@
     setInterval(updateHoursResponsive, 60000);
   })();
 </script>
+
+  </section>
 
   <!-- ===== TRUST BAR ===== -->
   <section class="trust-bar" aria-label="Trust badges">
@@ -1102,7 +1105,6 @@
 
   <div class="weave-divider" aria-hidden="true"></div>
 
-
   <!-- ===== HOW TO SHOP ===== -->
   <section class="how-to-shop" id="how-to-shop">
     <div class="section-inner">
@@ -1299,7 +1301,7 @@
           </span>
         </div>
         
-         <!-- Slide 4 - Gisubizo Bienfait -->
+        <!-- Slide 4 - Gisubizo Bienfait -->
         <div class="team-header-slide" data-slide="3">
           <img src="images/rb.png" alt="Gisubizo Bienfait - Import & Sourcing" loading="lazy" data-group="team">
           <div class="team-header-title">
@@ -1341,7 +1343,7 @@
     <!-- Dots -->
     <div class="team-header-dots" id="teamHeaderDots"></div>
 
-   <!-- ===== TEAM CARDS (UNCHANGED) ===== -->
+    <!-- ===== TEAM CARDS (UNCHANGED) ===== -->
     <div class="team-grid">
       <div class="team-card reveal">
         <div><a href="#" onclick="openLightbox(this); return false;"><img src="images/jj.jpeg" alt="Marie Rose, owner" loading="lazy" data-group="team"></a></div>
@@ -1428,6 +1430,12 @@
         </div>
         <ul id="listItems" class="list-items"></ul>
         <div class="list-empty" id="listEmpty">Your list is empty. Browse products above and click "Add to list".</div>
+        <div class="list-total" id="listTotal" style="display:none;">
+          <span class="list-total-label lang-en">Estimated Total</span>
+          <span class="list-total-label lang-rw" style="display:none;">Igiteranyo</span>
+          <span class="list-total-label lang-fr" style="display:none;">Total estimé</span>
+          <span class="list-total-amount" id="listTotalAmount">0 <span class="list-total-currency">RWF</span></span>
+        </div>
         <div class="list-actions" id="listActions" style="display:none;">
           <button id="listCopy" class="btn btn-ghost">Copy List</button>
           <button id="listClear" class="btn btn-ghost">Clear All</button>
@@ -1436,7 +1444,7 @@
         <div class="payment-note">
           <svg viewBox="0 0 24 24" class="payment-note-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
           <p>
-             <span class="lang-en">We confirm your order on WhatsApp, then you pay by <strong>MoMo Pay on 2003223</strong> or <strong>Mobile Money (MoMo) on 0789542601</strong> on pickup.</span>
+            <span class="lang-en">We confirm your order on WhatsApp, then you pay by <strong>MoMo Pay on 2003223</strong> or <strong>Mobile Money (MoMo) on 0789542601</strong> on pickup.</span>
             <span class="lang-rw" style="display:none;">Twemeza  ibyo watanze (komande) binyuze kuri WhatsApp, hanyuma ukishyura kuri <strong>MoMo Pay Kuri 2003223</strong> cyangwa <strong>Mobile Money (MoMo)</strong> Kuri 0789542601</strong> Mu gihe ushaka ibyo watumije.</span>
             <span class="lang-fr" style="display:none;">Nous confirmons votre commande sur WhatsApp, puis vous payez en <strong>MoMo Pay au 2003223</strong> ou par <strong>Mobile Money (MoMo)</strong> au 0789542601</strong> à la livraison.</span>
           </p>
@@ -1496,9 +1504,21 @@
           <li><span>Sunday</span><span>7:00 AM – 21:00 PM</span></li>
         </ul>
       </div>
+
+      <div class="footer-qr">
+        <img src="images/qr-whatsapp.svg" alt="Scan to chat with Marie Rose Shop on WhatsApp" width="120" height="120" loading="lazy">
+        <div class="footer-qr-text">
+          <strong class="lang-en">Scan to WhatsApp us</strong>
+          <strong class="lang-rw" style="display:none;">Skana kugira ngo utwandikire kuri WhatsApp</strong>
+          <strong class="lang-fr" style="display:none;">Scannez pour nous écrire sur WhatsApp</strong>
+          <span class="lang-en">Point your camera at the code</span>
+          <span class="lang-rw" style="display:none;">Erekeza kamera yawe kuri code</span>
+          <span class="lang-fr" style="display:none;">Pointez votre appareil photo sur le code</span>
+        </div>
+      </div>
   
 
-  <div class="footer-form">
+      <div class="footer-form">
         <h4 class="lang-en">Or send us a quick message</h4>
         <h4 class="lang-rw" style="display:none;">Cyangwa Utwoherereze ubutumwa bugufi</h4>
         <h4 class="lang-fr" style="display:none;">Ou envoyez-nous un message rapide</h4>
@@ -1674,9 +1694,9 @@
 <!-- Renders all product cards from products.json into .categories-stage.
      Must load BEFORE script.js (which searches/filters those cards) and
      must NOT use defer or async, so it finishes before script.js runs. -->
-<script src="products-render.js?v=20260903-1"></script>
-<script src="script.js?v=20260831-1"></script>
-    <script src="analytics-events.js?v=20260913-1"></script>
+<script src="products-render.js?v=20260913-1"></script>
+<script src="script.js?v=20260913-1"></script>
+ <script src="analytics-events.js?v=20260913-1"></script>
 
   <!-- PWA: register service worker for offline support + installability.
        This also keeps the site fresh on every device: sw.js fetches HTML "network-first"
