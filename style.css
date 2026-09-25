@@ -3397,6 +3397,37 @@ a:hover { color: var(--leaf-dark); }
   margin-bottom: 8px;
   font-size: 1rem;
 }
+.footer-qr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+}
+.footer-qr img {
+  width: 90px;
+  height: 90px;
+  background: #fff;
+  padding: 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.footer-qr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.footer-qr-text strong {
+  color: white;
+  font-size: .95rem;
+}
+.footer-qr-text span {
+  color: #a8a29e;
+  font-size: .82rem;
+}
 .footer-form { margin-top: 32px; }
 .footer-form h4 { color: white; font-size: 1.1rem; margin-bottom: 14px; }
 .footer-form input,
