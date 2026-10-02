@@ -299,12 +299,12 @@
         <a href="#contact" class="lang-en">Visit Us</a>
 
         <!-- Kinyarwanda Links -->
-        <a href="#about" class="lang-rw" style="display:none;">Ibyerekeye</a>
+        <a href="#about" class="lang-rw" style="display:none;">Ibitwerekeyeho</a>
         <a href="#products" class="lang-rw" style="display:none;">Ibicuruzwa</a>
-        <a href="#gallery" class="lang-rw" style="display:none;">Amashusho</a>
+        <a href="#gallery" class="lang-rw" style="display:none;">Amafoto</a>
         <a href="#team" class="lang-rw" style="display:none;">Itsinda</a>
         <a href="#faq" class="lang-rw" style="display:none;">Ibibazo</a>
-        <a href="#contact" class="lang-rw" style="display:none;">Tusura</a>
+        <a href="#contact" class="lang-rw" style="display:none;">Mudusure</a>
 
         <!-- French Links -->
         <a href="#about" class="lang-fr" style="display:none;">À propos</a>
@@ -1694,9 +1694,62 @@
 <!-- Renders all product cards from products.json into .categories-stage.
      Must load BEFORE script.js (which searches/filters those cards) and
      must NOT use defer or async, so it finishes before script.js runs. -->
-<script src="products-render.js?v=20260913-1"></script>
-<script src="script.js?v=20260913-1"></script>
- <script src="analytics-events.js?v=20260913-1"></script>
+<!-- ===== MOBILE MENU DRAWER (opens from the hamburger on phones) ===== -->
+<div class="mm-overlay" id="mmOverlay"></div>
+<aside class="mm-drawer" id="mmDrawer" aria-hidden="true" aria-label="Menu">
+  <div class="mm-head">
+    <span class="mm-avatar">MR</span>
+    <div class="mm-who">
+      <strong>Marie Rose Shop</strong>
+      <small><span class="lang-en">Neighbourhood shop · Kabuye</span><span class="lang-rw">Iduka ryo mu gace · Kabuye</span><span class="lang-fr">Boutique de quartier · Kabuye</span></small>
+    </div>
+    <button type="button" class="mm-close" id="mmClose" aria-label="Close menu">&times;</button>
+  </div>
+  <div class="mm-body">
+    <p class="mm-label"><span class="lang-en">Language</span><span class="lang-rw">Ururimi</span><span class="lang-fr">Langue</span></p>
+    <div class="mm-langs">
+      <button type="button" class="mm-lang" data-lang="en"><b>GB</b><small>ENG</small></button>
+      <button type="button" class="mm-lang" data-lang="fr"><b>FR</b><small>FRA</small></button>
+      <button type="button" class="mm-lang" data-lang="rw"><b>RW</b><small>RWA</small></button>
+    </div>
+    <p class="mm-label"><span class="lang-en">Navigate</span><span class="lang-rw">Ihuza</span><span class="lang-fr">Naviguer</span></p>
+    <nav class="mm-nav">
+      <a href="#about" class="mm-link">
+        <span class="mm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.8" r=".6"/></svg></span>
+        <span class="mm-txt"><span class="lang-en">About</span><span class="lang-rw">Ibyerekeye</span><span class="lang-fr">À propos</span></span>
+        <span class="mm-chev" aria-hidden="true">&#8250;</span>
+      </a>
+      <a href="#products" class="mm-link">
+        <span class="mm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 12H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span>
+        <span class="mm-txt"><span class="lang-en">Products</span><span class="lang-rw">Ibicuruzwa</span><span class="lang-fr">Produits</span></span>
+        <span class="mm-chev" aria-hidden="true">&#8250;</span>
+      </a>
+      <a href="#gallery" class="mm-link">
+        <span class="mm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg></span>
+        <span class="mm-txt"><span class="lang-en">Gallery</span><span class="lang-rw">Amashusho</span><span class="lang-fr">Galerie</span></span>
+        <span class="mm-chev" aria-hidden="true">&#8250;</span>
+      </a>
+      <a href="#team" class="mm-link">
+        <span class="mm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M17 14c2.4 0 4 1.8 4 4.5"/></svg></span>
+        <span class="mm-txt"><span class="lang-en">Our Team</span><span class="lang-rw">Itsinda</span><span class="lang-fr">Notre équipe</span></span>
+        <span class="mm-chev" aria-hidden="true">&#8250;</span>
+      </a>
+      <a href="#faq" class="mm-link">
+        <span class="mm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8"/><circle cx="12" cy="17" r=".6"/></svg></span>
+        <span class="mm-txt"><span class="lang-en">FAQ</span><span class="lang-rw">Ibibazo</span><span class="lang-fr">FAQ</span></span>
+        <span class="mm-chev" aria-hidden="true">&#8250;</span>
+      </a>
+      <a href="#contact" class="mm-link">
+        <span class="mm-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span>
+        <span class="mm-txt"><span class="lang-en">Visit Us</span><span class="lang-rw">Tusura</span><span class="lang-fr">Visitez-nous</span></span>
+        <span class="mm-chev" aria-hidden="true">&#8250;</span>
+      </a>
+    </nav>
+  </div>
+</aside>
+<script src="products-render.js?v=20261002-1"></script>
+<script src="script.js?v=20261002-1"></script>
+ <script src="analytics-events.js?v=20261002-1"></script>
 
   <!-- PWA: register service worker for offline support + installability.
        This also keeps the site fresh on every device: sw.js fetches HTML "network-first"
@@ -1750,5 +1803,7 @@
       }
     }
   </script>
+
 </body>
 </html>
+ 
