@@ -1386,6 +1386,25 @@
     fr: "Je n'ai pas bien compris ! Pourriez-vous reformuler en quelques mots — par exemple 'à quelle heure ouvrez-vous' ou 'avez-vous du riz' ?"
   };
 
+  var PORTFOLIO_URL = 'https://gikundiro-pierrot.web.app';
+  var DEV_PHONE_TEXT = '0780 212 378';
+  var DEV_LINKS = '<br><br>🌐 <a href="' + PORTFOLIO_URL + '" target="_blank" rel="noopener"><b>gikundiro-pierrot.web.app</b></a>'
+                + '<br>📞 <a href="tel:+250780212378"><b>' + DEV_PHONE_TEXT + '</b></a>'
+                + ' · <a href="https://wa.me/250780212378" target="_blank" rel="noopener">WhatsApp</a>';
+  var DEVELOPER_REPLIES = {
+    en: 'This website and I (the AI Assistant) were built by <b>Gikundiro Pierrot</b>, a full-stack web developer from Kigali, Rwanda. 🚀 See his portfolio or contact him:' + DEV_LINKS,
+    rw: 'Uru rubuga nanjye (umufasha wa AI) twubatswe na <b>Gikundiro Pierrot</b>, umuhanga mu gukora imbuga za interineti (full-stack) wo i Kigali, mu Rwanda. 🚀 Reba portfolio ye cyangwa umwandikire:' + DEV_LINKS,
+    fr: 'Ce site web et moi (l\'assistant IA) avons été créés par <b>Gikundiro Pierrot</b>, développeur web full-stack basé à Kigali, au Rwanda. 🚀 Découvrez son portfolio ou contactez-le :' + DEV_LINKS
+  };
+  function isDeveloperQuestion(q) {
+    var keys = ['who built','who made this','who made the website','who made you','who created','who developed','who designed','who coded','who programmed','who is the developer','who owns this website',
+      'developer','web developer','built this','built you','made you','created you','made this website','created this website','your creator','your developer',
+      'gikundiro','pierrot','portfolio',
+      'wakoze','wakubatse','wakureze','wubatse','wakoze uru rubuga','nde wakoze','nde wubatse','nde wakureze','umukoze',
+      'qui a créé','qui a cree','qui a fait ce site','qui a fait le site','qui a développé','qui a developpe','qui a conçu','qui a concu','développeur','developpeur','votre créateur','createur'];
+    return keys.some(function (k) { return q.indexOf(k) !== -1; });
+  }
+
   function getAIResponse(query) {
     const lang = getCurrentLanguage();
     const q = query.toLowerCase().trim();
@@ -1395,6 +1414,9 @@
     if (isJailbreakAttempt(q)) return JAILBREAK_REPLIES[lang] || JAILBREAK_REPLIES.en;
     if (isImpossibleRequest(q)) return IMPOSSIBLE_REPLIES[lang] || IMPOSSIBLE_REPLIES.en;
     if (isGibberish(q)) return GIBBERISH_REPLIES[lang] || GIBBERISH_REPLIES.en;
+
+    // Developer / credit questions: answered first, in every language
+    if (isDeveloperQuestion(q)) return DEVELOPER_REPLIES[lang] || DEVELOPER_REPLIES.en;
 
     if (lang === 'en') {
       if (q === 'hi' || q === 'hello' || q === 'hey' || q === 'yo' || q === 'wssp' || q === 'sup' || q === 'hy' || q.includes('good morning') || q.includes('good afternoon') || q.includes('good evening')) {
@@ -2784,4 +2806,36 @@
   
   // Also run after a small delay to ensure everything is rendered
   setTimeout(centerHeroContent, 100);
+})();
+
+/* ===== MOBILE MENU DRAWER ===== */
+(function () {
+  'use strict';
+  var toggle = document.getElementById('navToggle');
+  var drawer = document.getElementById('mmDrawer');
+  var overlay = document.getElementById('mmOverlay');
+  var closeBtn = document.getElementById('mmClose');
+  if (!toggle || !drawer) return;
+
+  function setOpen(open) {
+    document.body.classList.toggle('mm-open', open);
+    drawer.setAttribute('aria-hidden', String(!open));
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+  toggle.addEventListener('click', function () { setOpen(!document.body.classList.contains('mm-open')); });
+  if (overlay) overlay.addEventListener('click', function () { setOpen(false); });
+  if (closeBtn) closeBtn.addEventListener('click', function () { setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+  window.addEventListener('resize', function () { if (window.innerWidth > 640) setOpen(false); });
+
+  drawer.querySelectorAll('.mm-link').forEach(function (a) {
+    a.addEventListener('click', function () { setOpen(false); });
+  });
+  // language tiles reuse the site's existing language buttons (keeps everything in sync)
+  drawer.querySelectorAll('.mm-lang').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var real = document.querySelector('.lang-btn[data-lang="' + b.getAttribute('data-lang') + '"]');
+      if (real) real.click();
+    });
+  });
 })();
